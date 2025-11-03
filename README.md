@@ -1,3 +1,1 @@
-An example mod for Necesse.
-
-Check out the [modding wiki page](https://necessewiki.com/Modding) for more.
+Hi I like destroying stuff in necesse and so I made this mod to destroy and harvest the environment harder >:D
