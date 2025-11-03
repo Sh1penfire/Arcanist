@@ -1,0 +1,287 @@
+package arcanist;
+
+import arcanist.content.ModBuffs;
+import arcanist.content.ModItems;
+import arcanist.content.ModProjectiles;
+import arcanist.content.UpdateAmmoTypes;
+import arcanist.tiles.CrusherObject;
+import arcanist.tiles.PackagerObject;
+import arcanist.tiles.ScorcherObject;
+import necesse.engine.modLoader.annotations.ModEntry;
+import necesse.engine.registries.*;
+import necesse.inventory.item.Item;
+import necesse.inventory.item.ItemCategory;
+import necesse.inventory.recipe.Ingredient;
+import necesse.inventory.recipe.Recipe;
+import necesse.inventory.recipe.Recipes;
+import necesse.inventory.recipe.Tech;
+
+import static arcanist.content.ModItems.clusterMap;
+import static arcanist.content.ModItems.dustMap;
+
+@ModEntry
+public class Arcanist {
+
+    public void init() {
+        ModTechs.register();
+
+        /*
+        BONUS_CONTAINER = ContainerRegistry.registerOEContainer((client, uniqueSeed, oe, content) -> new BonusPartContainerForm<>(client, new BonusPartContainer(client.getClient(), uniqueSeed, (BonusPartStationObjectEntity)oe, new PacketReader(content))), (client, uniqueSeed, oe, content, serverObject) -> new BonusPartContainer(client, uniqueSeed, (BonusPartStationObjectEntity)oe, new PacketReader(content)));
+        GunsmithContainer.openAndSendContainer(gunsmith.BONUS_CONTAINER, player.getServerClient(), level, x, y);
+        FueledProcessingOEInventoryContainer
+        ContainerRegistry.FUELED_PROCESSING_STATION_CONTAINER
+
+         */
+
+        // Register our tiles
+        //TileRegistry.registerTile("exampletile", new ExampleTile(), 1, true);
+
+        //Crusher?
+        ObjectRegistry.registerObject("crusher", new CrusherObject(), 1, true);
+        //Crusher?
+        ObjectRegistry.registerObject("packager", new PackagerObject(), 1, true);
+        //Crusher?
+        ObjectRegistry.registerObject("scorcher", new ScorcherObject(), 1, true);
+
+        //Crusher
+        //ObjectRegistry.registerObject("fasterforge", new ProcessingForgeObject(), 1, true);
+
+
+
+        // Register out objects
+        //ObjectRegistry.registerObject("exampleobject", new ExampleObject(), 2, true);
+
+        ModItems.load();
+        ModProjectiles.load();
+        ModBuffs.load();
+
+        // Register our mob
+        //MobRegistry.registerMob("examplemob", ExampleMob.class, true);
+
+        // Register our projectile
+        //ProjectileRegistry.registerProjectile("exampleprojectile", ExampleProjectile.class, "exampleprojectile", "exampleprojectile_shadow");
+
+        // Register our buff
+        //BuffRegistry.registerBuff("examplebuff", new ExampleBuff());
+
+    }
+
+    public void initResources() {
+        // Sometimes your textures will have a black or other outline unintended under rotation or scaling
+        // This is caused by alpha blending between transparent pixels and the edge
+        // To fix this, run the preAntialiasTextures gradle task
+        // It will process your textures and save them again with a fixed alpha edge color
+
+    }
+
+    public void crushingRecipe(String source, String output, int amount){
+        Recipes.registerModRecipe(new Recipe(
+                output,
+                amount,
+                ModTechs.CRUSHING,
+                new Ingredient[]{
+                        new Ingredient(source, 1)
+                }
+        ));
+    }
+
+    //Used for dusts to packages, taking 2 dust + 1 log per package
+    public void packagingRecipe(String source, String packed, int amount, int produced){
+        Recipes.registerModRecipe(new Recipe(
+                packed,
+                produced,
+                ModTechs.PACKAGING,
+                new Ingredient[]{
+                        new Ingredient(source, amount),
+                        new Ingredient("anylog", 1)
+                }
+        ));
+    }
+    public void packagingRecipe(String source, String packed, int amount){
+        packagingRecipe(source, packed, amount, 1);
+    }
+
+    //Used for things like bullets/arrows
+    public void containmentRecipe(String material, String container, String packed, int amount){
+        Recipes.registerModRecipe(new Recipe(
+                packed,
+                amount,
+                ModTechs.PACKAGING,
+                new Ingredient[]{
+                        new Ingredient(container, amount),
+                        new Ingredient(material, 1)
+                }
+        ));
+    }
+    public void infuseArrow(String material, String output, int amount){
+        containmentRecipe(material, "stonearrow", output, amount);
+    }
+
+    public void infuseBullet(String material, String output, int amount){
+        containmentRecipe(material, "simplebullet", output, amount);
+    }
+
+    public void scorchingRecipe(String source, String bar, int requirement){
+        Recipes.registerModRecipe(new Recipe(
+                bar,
+                1,
+                ModTechs.SCORCHING,
+                new Ingredient[]{
+                        new Ingredient(source, requirement)
+                }
+        ));
+    }
+
+    public void setupCrushing(String bar, String ore, String dust, String packed, int efficiency){
+        crushingRecipe(bar, dust, 2);
+        crushingRecipe(ore, dust, 1 * efficiency);
+        packagingRecipe(dust, packed, 2);
+        scorchingRecipe(packed, bar, 1);
+        dustMap.put(ore, dust);
+    }
+
+    public void clusterCrushing(String material, String cluster){
+        clusterMap.put(material, cluster);
+        crushingRecipe(cluster, material, 3);
+    }
+
+    public void postInit() {
+        UpdateAmmoTypes.update();
+        // Add recipes
+        setupCrushing("copperbar", "copperore", "copper_dust", "copper_dust_package", 1);
+        setupCrushing("ironbar", "ironore", "iron_dust", "iron_dust_package", 1);
+        setupCrushing("goldbar", "goldore", "gold_dust", "gold_dust_package", 2);
+        setupCrushing("ivybar", "ivyore", "ivy_paste", "ivy_paste_package", 1);
+
+        infuseArrow("torch", "firearrow", 20);
+        infuseArrow("frostshard", "frostarrow", 20);
+        infuseBullet("voidshard", "frostbullet", 100);
+        infuseBullet("voidshard", "voidbullet", 200);
+        infuseBullet("gold_dust", "midas_bullet", 10);
+        infuseBullet("ironpickaxe", "drill_bullet", 10);
+
+        //Doing theese manually
+        //I know necesse expanded already has bomb recipies using fertiliser so im using the firemone seeds instead
+        Recipes.registerModRecipe(new Recipe(
+                "ironbomb",
+                1,
+                ModTechs.PACKAGING,
+                new Ingredient[]{
+                        new Ingredient("firemoneseed", 2)
+                }
+        ));
+
+        clusterCrushing("frostshard", "frostshard_cluster");
+        clusterCrushing("quartz", "quartz_cluster");
+
+        Recipes.registerModRecipe(new Recipe(
+                "ore_pouch",
+                1,
+                RecipeTechRegistry.DEMONIC_WORKSTATION,
+                new Ingredient[]{
+                        new Ingredient("runed_steel", 12),
+                        new Ingredient("leather", 20)
+                }
+        ));
+
+        Recipes.registerModRecipe(new Recipe(
+                "propick",
+                1,
+                RecipeTechRegistry.DEMONIC_WORKSTATION,
+                new Ingredient[]{
+                        new Ingredient("runed_steel", 12),
+                        new Ingredient("anylog", 5)
+                }
+        ));
+
+        Recipes.registerModRecipe(new Recipe(
+
+                "runestone_paste",
+                4,
+                ModTechs.CRUSHING,
+                new Ingredient[]{
+                        new Ingredient("runestone", 1)
+                }
+        ));
+
+        dustMap.put("runestone", "runestone_paste");
+
+        Recipes.registerModRecipe(new Recipe(
+                "charloag",
+                2,
+                ModTechs.SCORCHING,
+                new Ingredient[]{
+                        new Ingredient("anycharrable", 1)
+                }
+        ));
+
+        Recipes.registerModRecipe(new Recipe(
+                "midas_bullet",
+                10,
+                RecipeTechRegistry.DEMONIC_ANVIL,
+                new Ingredient[]{
+                        new Ingredient("simplebullet", 10),
+                        new Ingredient("gold_dust", 1)
+                }
+        ));
+
+        Recipes.registerModRecipe(new Recipe(
+                "astral_fulgurite",
+                1,
+                RecipeTechRegistry.ALCHEMY,
+                new Ingredient[]{
+                        new Ingredient("ruby", 10)
+                }
+        ));
+
+        Recipes.registerModRecipe(new Recipe(
+                "runed_steel",
+                1,
+                RecipeTechRegistry.ALCHEMY,
+                new Ingredient[]{
+                        new Ingredient("iron_dust", 2),
+                        new Ingredient("runestone_paste", 8),
+                        new Ingredient("charloag", 2)
+                }
+        ));
+
+        Recipes.registerModRecipe(new Recipe(
+                "scorcher",
+                1,
+                RecipeTechRegistry.DEMONIC_WORKSTATION,
+                new Ingredient[]{
+                        new Ingredient("anystone", 12)
+                }
+        ));
+
+        Recipes.registerModRecipe(new Recipe(
+                "packager",
+                1,
+                RecipeTechRegistry.DEMONIC_WORKSTATION,
+                new Ingredient[]{
+                        new Ingredient("anystone", 15),
+                        new Ingredient("clay", 12)
+                }
+        ));
+
+        Recipes.registerModRecipe(new Recipe(
+                "crusher",
+                1,
+                RecipeTechRegistry.DEMONIC_WORKSTATION,
+                new Ingredient[]{
+                        new Ingredient("anystone", 40),
+                        new Ingredient("ironbomb", 2)
+                }
+        ));
+
+        clusterMap.put("frostshard", "frostshard_cluster");
+
+        // Add out example mob to default cave mobs.
+        // Spawn tables use a ticket/weight system. In general, common mobs have about 100 tickets.
+        //Biome.defaultCaveMobs.add(100, "examplemob");
+
+        //GameEvents.addListener(MobLootTableDropsEvent.class, new PropickEventHandler());
+        //GameEvents.addListener(MobLootTableDropsEvent.class, new PropickEventHandler());
+    }
+
+}

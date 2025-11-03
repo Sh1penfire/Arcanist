@@ -1,2 +1,3 @@
-# Arcanist
-Making a necesse mod cause I like machines and destroying stuff so mod about dat
+An example mod for Necesse.
+
+Check out the [modding wiki page](https://necessewiki.com/Modding) for more.

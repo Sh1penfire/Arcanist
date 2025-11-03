@@ -1,0 +1,62 @@
+[tile]
+exampletile=Example Tile
+
+[object]
+exampleobject=Example Object
+crusher=Crusher
+packager=Packager
+scorcher=Scorcher
+
+[item]
+exampleitem=Example Item
+examplesword=Example Sword
+examplestaff=Example Staff
+
+copper_dust=Copper Dust
+iron_dust=Iron Dust
+gold_dust=Gold Dust
+runestone_paste=Runestone Paste
+ivy_paste=Ivy Paste
+
+copper_dust_package=Copper Dust Package
+iron_dust_package=Iron Dust Package
+gold_dust_package=Gold Dust Package
+ivy_paste_package=Ivy Paste Package
+
+frostshard_cluster=Frost Shard Cluster
+quartz_cluster=Quartz Cluster
+
+runed_steel=Runesteel
+charloag=Charloag
+
+propick=Propick
+
+ore_pouch=Ore Pouch
+
+drill_bullet=Drill Bullet
+midas_bullet=Midas Bullet
+
+[itemtooltip]
+examplestafftip=Shoots a homing, piercing projectile
+propick_tip=Allow you to find extra goodies in ore!
+midasammo_tip=Makes mobs drop gold on hit!
+drillammo_tip=Damages Objects\nScales with both ranged and tool damage modifiers!
+
+cluster_tip=Crush in a crusher for more goodies!
+orepouch_tip=Stores ores, gems and dusts
+storedores=Stord ores: <amount>
+
+charrable_tip=Charrable in a scorcher
+
+crusher_tip=Smashes items down into finer bits
+packager_tip=Packages material into containers
+scorcher_tip=Scorches logs and dust packages
+
+[mob]
+
+[buff]
+
+
+[itemcategory]
+dusts=Dusts
+clusters=Clusters
