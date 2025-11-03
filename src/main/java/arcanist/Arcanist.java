@@ -180,7 +180,8 @@ public class Arcanist {
                 RecipeTechRegistry.DEMONIC_WORKSTATION,
                 new Ingredient[]{
                         new Ingredient("runed_steel", 12),
-                        new Ingredient("leather", 20)
+                        new Ingredient("leather", 20),
+                        new Ingredient("miningpotion", 5)
                 }
         ));
 
@@ -190,9 +191,10 @@ public class Arcanist {
                 RecipeTechRegistry.DEMONIC_WORKSTATION,
                 new Ingredient[]{
                         new Ingredient("runed_steel", 12),
-                        new Ingredient("anylog", 5)
+                        new Ingredient("gold_dust", 12),
+                        new Ingredient("leather", 8)
                 }
-        ));
+        ).showAfter("calmingminersbouquet"));
 
         Recipes.registerModRecipe(new Recipe(
 
@@ -252,7 +254,7 @@ public class Arcanist {
                 new Ingredient[]{
                         new Ingredient("anystone", 12)
                 }
-        ));
+        ).showAfter("forge"));
 
         Recipes.registerModRecipe(new Recipe(
                 "packager",
@@ -262,7 +264,7 @@ public class Arcanist {
                         new Ingredient("anystone", 15),
                         new Ingredient("clay", 12)
                 }
-        ));
+        ).showAfter("scorcher"));
 
         Recipes.registerModRecipe(new Recipe(
                 "crusher",
@@ -272,7 +274,7 @@ public class Arcanist {
                         new Ingredient("anystone", 40),
                         new Ingredient("ironbomb", 2)
                 }
-        ));
+        ).showAfter("packager"));
 
         clusterMap.put("frostshard", "frostshard_cluster");
 

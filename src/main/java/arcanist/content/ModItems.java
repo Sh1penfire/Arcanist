@@ -38,6 +38,7 @@ public class ModItems {
 
          */
         ItemCategory dusts = ItemCategory.createCategory("C-C-A", "materials", "dusts");
+        ItemCategory packages = ItemCategory.createCategory("C-C-A", "materials", "packages");
         ItemCategory clusters = ItemCategory.createCategory("C-B-A", "materials", "clusters");
 
         // Register our items
@@ -51,12 +52,12 @@ public class ModItems {
         ItemRegistry.registerItem("runestone_paste", new DustItem(100), 5, true);
         ItemRegistry.registerItem("ivy_paste", new DustItem(100), 5, true);
 
-        ItemRegistry.registerItem("copper_dust_package", new MatItem(100), 1, true);
-        ItemRegistry.registerItem("iron_dust_package", new MatItem(100), 2, true);
-        ItemRegistry.registerItem("gold_dust_package", new MatItem(100), 10, true);
-        ItemRegistry.registerItem("ivy_paste_package", new MatItem(100), 10, true);
+        ItemRegistry.registerItem("copper_dust_package", new PackageItem(500), 1, true);
+        ItemRegistry.registerItem("iron_dust_package", new PackageItem(500), 2, true);
+        ItemRegistry.registerItem("gold_dust_package", new PackageItem(500), 10, true);
+        ItemRegistry.registerItem("ivy_paste_package", new PackageItem(500), 7, true);
 
-        ItemRegistry.registerItem("runed_steel", new MatItem(250), 4, true);
+        ItemRegistry.registerItem("runed_steel", new MatItem(250).setItemCategory("materials", "bars"), 4, true);
 
         ItemRegistry.registerItem("frostshard_cluster", new ClusterItem(250), 4, true);
         ItemRegistry.registerItem("quartz_cluster", new ClusterItem(250), 4, true);
