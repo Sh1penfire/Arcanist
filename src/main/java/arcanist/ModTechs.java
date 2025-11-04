@@ -9,9 +9,9 @@ public class ModTechs {
     PACKAGING,
     SCORCHING;
     public static void register(){
-        CRUSHING = register("crushing", "crusher");
-        PACKAGING = register("packaging", "packager");
-        SCORCHING = register("scorching", "scorcher");
+        CRUSHING = register("acn_crushing", "acn_crusher");
+        PACKAGING = register("acn_packaging", "acn_packager");
+        SCORCHING = register("acn_scorching", "acn_scorcher");
     }
 
     public static Tech register(String tech, String object){

@@ -12,12 +12,12 @@ public class ModBuffs {
     midas, propick, manasight;
 
     public static void load(){
-        midas = BuffRegistry.registerBuff("midas", new MidasBuff());
+        midas = BuffRegistry.registerBuff("acn_midas", new MidasBuff());
 
         //Trinket buffs
-        propick = BuffRegistry.registerBuff("propick", new PropickTrinketBuff());
+        propick = BuffRegistry.registerBuff("acn_propick", new PropickTrinketBuff());
 
-        manasight = BuffRegistry.registerBuff("manasight", new Buff() {
+        manasight = BuffRegistry.registerBuff("acn_manasight", new Buff() {
             @Override
             public void init(ActiveBuff activeBuff, BuffEventSubscriber buffEventSubscriber) {
 

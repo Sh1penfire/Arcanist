@@ -3,38 +3,38 @@ exampletile=Example Tile
 
 [object]
 exampleobject=Example Object
-crusher=Crusher
-packager=Packager
-scorcher=Scorcher
+acn_crusher=Crusher
+acn_packager=Packager
+acn_scorcher=Scorcher
 
 [item]
 exampleitem=Example Item
 examplesword=Example Sword
 examplestaff=Example Staff
 
-copper_dust=Copper Dust
-iron_dust=Iron Dust
-gold_dust=Gold Dust
-runestone_paste=Runestone Paste
-ivy_paste=Ivy Paste
+acn_copper_dust=Copper Dust
+acn_iron_dust=Iron Dust
+acn_gold_dust=Gold Dust
+acn_runestone_paste=Runestone Paste
+acn_ivy_paste=Ivy Paste
 
-copper_dust_package=Copper Dust Package
-iron_dust_package=Iron Dust Package
-gold_dust_package=Gold Dust Package
-ivy_paste_package=Ivy Paste Package
+acn_copper_dust_package=Copper Dust Package
+acn_iron_dust_package=Iron Dust Package
+acn_gold_dust_package=Gold Dust Package
+acn_ivy_paste_package=Ivy Paste Package
 
-frostshard_cluster=Frost Shard Cluster
-quartz_cluster=Quartz Cluster
+acn_frostshard_cluster=Frost Shard Cluster
+acn_quartz_cluster=Quartz Cluster
 
-runed_steel=Runesteel
-charloag=Charloag
+acn_runed_steel=Runesteel
+acn_charloag=Charloag
 
-propick=Propick
+acn_propick=Propick
 
-ore_pouch=Ore Pouch
+acn_ore_pouch=Ore Pouch
 
-drill_bullet=Drill Bullet
-midas_bullet=Midas Bullet
+acn_drill_bullet=Drill Bullet
+acn_midas_bullet=Midas Bullet
 
 [itemtooltip]
 examplestafftip=Shoots a homing, piercing projectile
@@ -58,6 +58,6 @@ scorcher_tip=Scorches logs and dust packages
 
 
 [itemcategory]
-dusts=Dusts
-clusters=Clusters
-packages=Clusters
+acn_dusts=Dusts
+acn_clusters=Clusters
+acn_packages=Clusters

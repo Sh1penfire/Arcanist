@@ -6,7 +6,7 @@ import necesse.engine.registries.ProjectileRegistry;
 
 public class ModProjectiles {
     public static void load(){
-        ProjectileRegistry.registerProjectile("midas_bullet", MidasBulletProjectile.class, "midas_bullet", "midas_bullet_shadow");
-        ProjectileRegistry.registerProjectile("drill_bullet", DrillBulletProjectile.class, "drill_bullet", "drill_bullet_shadow");
+        ProjectileRegistry.registerProjectile("acn_midas_bullet", MidasBulletProjectile.class, "acn_midas_bullet", "acn_midas_bullet_shadow");
+        ProjectileRegistry.registerProjectile("acn_drill_bullet", DrillBulletProjectile.class, "acn_drill_bullet", "acn_drill_bullet_shadow");
     }
 }

@@ -1,4 +1,4 @@
-package arcanist.items;
+package arcanist.items.trinkets;
 
 import necesse.engine.localization.Localization;
 import necesse.engine.registries.BuffRegistry;
@@ -23,6 +23,6 @@ public class PropickTrinket extends TrinketItem {
     }
 
     public TrinketBuff[] getBuffs(InventoryItem item) {
-        return new TrinketBuff[]{(TrinketBuff) BuffRegistry.getBuff("propick")};
+        return new TrinketBuff[]{(TrinketBuff) BuffRegistry.getBuff("acn_propick")};
     }
 }

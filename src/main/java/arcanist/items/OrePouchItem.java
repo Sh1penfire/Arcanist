@@ -29,7 +29,7 @@ public class OrePouchItem extends PouchItem {
 
     public boolean isValidRequestItem(Item item) {
         category = ItemCategory.getItemsCategory(item).stringID;
-        return this.isValidRequestType(item.type) && (category.equals("ore") || category.equals("dusts") || category.equals("minerals"));
+        return this.isValidRequestType(item.type) && (category.equals("ore") || category.equals("acn_dusts") || category.equals("acn_minerals") || category.equals("acn_clusters"));
     }
 
     public boolean isValidRequestType(Item.Type type) {

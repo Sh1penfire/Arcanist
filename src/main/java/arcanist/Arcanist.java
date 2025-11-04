@@ -1,9 +1,6 @@
 package arcanist;
 
-import arcanist.content.ModBuffs;
-import arcanist.content.ModItems;
-import arcanist.content.ModProjectiles;
-import arcanist.content.UpdateAmmoTypes;
+import arcanist.content.*;
 import arcanist.tiles.CrusherObject;
 import arcanist.tiles.PackagerObject;
 import arcanist.tiles.ScorcherObject;
@@ -25,6 +22,8 @@ public class Arcanist {
     public void init() {
         ModTechs.register();
 
+        ModContainers.load();
+
         /*
         BONUS_CONTAINER = ContainerRegistry.registerOEContainer((client, uniqueSeed, oe, content) -> new BonusPartContainerForm<>(client, new BonusPartContainer(client.getClient(), uniqueSeed, (BonusPartStationObjectEntity)oe, new PacketReader(content))), (client, uniqueSeed, oe, content, serverObject) -> new BonusPartContainer(client, uniqueSeed, (BonusPartStationObjectEntity)oe, new PacketReader(content)));
         GunsmithContainer.openAndSendContainer(gunsmith.BONUS_CONTAINER, player.getServerClient(), level, x, y);
@@ -36,17 +35,12 @@ public class Arcanist {
         // Register our tiles
         //TileRegistry.registerTile("exampletile", new ExampleTile(), 1, true);
 
-        //Crusher?
-        ObjectRegistry.registerObject("crusher", new CrusherObject(), 1, true);
-        //Crusher?
-        ObjectRegistry.registerObject("packager", new PackagerObject(), 1, true);
-        //Crusher?
-        ObjectRegistry.registerObject("scorcher", new ScorcherObject(), 1, true);
-
-        //Crusher
-        //ObjectRegistry.registerObject("fasterforge", new ProcessingForgeObject(), 1, true);
-
-
+        //Crusher..?
+        ObjectRegistry.registerObject("acn_crusher", new CrusherObject(), 1, true);
+        //Crusher??
+        ObjectRegistry.registerObject("acn_packager", new PackagerObject(), 1, true);
+        //Crusher???
+        ObjectRegistry.registerObject("acn_scorcher", new ScorcherObject(), 1, true);
 
         // Register out objects
         //ObjectRegistry.registerObject("exampleobject", new ExampleObject(), 2, true);
@@ -148,17 +142,17 @@ public class Arcanist {
     public void postInit() {
         UpdateAmmoTypes.update();
         // Add recipes
-        setupCrushing("copperbar", "copperore", "copper_dust", "copper_dust_package", 1);
-        setupCrushing("ironbar", "ironore", "iron_dust", "iron_dust_package", 1);
-        setupCrushing("goldbar", "goldore", "gold_dust", "gold_dust_package", 2);
-        setupCrushing("ivybar", "ivyore", "ivy_paste", "ivy_paste_package", 1);
+        setupCrushing("copperbar", "copperore", "acn_copper_dust", "acn_copper_dust_package", 1);
+        setupCrushing("ironbar", "ironore", "acn_iron_dust", "acn_iron_dust_package", 1);
+        setupCrushing("goldbar", "goldore", "acn_gold_dust", "acn_gold_dust_package", 2);
+        setupCrushing("ivybar", "ivyore", "acn_ivy_paste", "acn_ivy_paste_package", 1);
 
         infuseArrow("torch", "firearrow", 20);
         infuseArrow("frostshard", "frostarrow", 20);
         infuseBullet("voidshard", "frostbullet", 100);
         infuseBullet("voidshard", "voidbullet", 200);
-        infuseBullet("gold_dust", "midas_bullet", 10);
-        infuseBullet("ironpickaxe", "drill_bullet", 10);
+        infuseBullet("acn_gold_dust", "acn_midas_bullet", 10);
+        infuseBullet("ironpickaxe", "acn_drill_bullet", 10);
 
         //Doing theese manually
         //I know necesse expanded already has bomb recipies using fertiliser so im using the firemone seeds instead
@@ -171,34 +165,34 @@ public class Arcanist {
                 }
         ));
 
-        clusterCrushing("frostshard", "frostshard_cluster");
-        clusterCrushing("quartz", "quartz_cluster");
+        clusterCrushing("frostshard", "acn_frostshard_cluster");
+        clusterCrushing("quartz", "acn_quartz_cluster");
 
         Recipes.registerModRecipe(new Recipe(
-                "ore_pouch",
+                "acn_ore_pouch",
                 1,
                 RecipeTechRegistry.DEMONIC_WORKSTATION,
                 new Ingredient[]{
-                        new Ingredient("runed_steel", 12),
+                        new Ingredient("acn_runed_steel", 12),
                         new Ingredient("leather", 20),
                         new Ingredient("miningpotion", 5)
                 }
         ));
 
         Recipes.registerModRecipe(new Recipe(
-                "propick",
+                "acn_propick",
                 1,
                 RecipeTechRegistry.DEMONIC_WORKSTATION,
                 new Ingredient[]{
-                        new Ingredient("runed_steel", 12),
-                        new Ingredient("gold_dust", 12),
+                        new Ingredient("acn_runed_steel", 12),
+                        new Ingredient("acn_gold_dust", 12),
                         new Ingredient("leather", 8)
                 }
         ).showAfter("calmingminersbouquet"));
 
         Recipes.registerModRecipe(new Recipe(
 
-                "runestone_paste",
+                "acn_runestone_paste",
                 4,
                 ModTechs.CRUSHING,
                 new Ingredient[]{
@@ -206,10 +200,10 @@ public class Arcanist {
                 }
         ));
 
-        dustMap.put("runestone", "runestone_paste");
+        dustMap.put("runestone", "acn_runestone_paste");
 
         Recipes.registerModRecipe(new Recipe(
-                "charloag",
+                "acn_charloag",
                 2,
                 ModTechs.SCORCHING,
                 new Ingredient[]{
@@ -218,12 +212,12 @@ public class Arcanist {
         ));
 
         Recipes.registerModRecipe(new Recipe(
-                "midas_bullet",
+                "acn_midas_bullet",
                 10,
                 RecipeTechRegistry.DEMONIC_ANVIL,
                 new Ingredient[]{
                         new Ingredient("simplebullet", 10),
-                        new Ingredient("gold_dust", 1)
+                        new Ingredient("acn_gold_dust", 1)
                 }
         ));
 
@@ -237,18 +231,18 @@ public class Arcanist {
         ));
 
         Recipes.registerModRecipe(new Recipe(
-                "runed_steel",
+                "acn_runed_steel",
                 1,
                 RecipeTechRegistry.ALCHEMY,
                 new Ingredient[]{
-                        new Ingredient("iron_dust", 2),
-                        new Ingredient("runestone_paste", 8),
-                        new Ingredient("charloag", 2)
+                        new Ingredient("acn_iron_dust", 2),
+                        new Ingredient("acn_runestone_paste", 8),
+                        new Ingredient("acn_charloag", 2)
                 }
         ));
 
         Recipes.registerModRecipe(new Recipe(
-                "scorcher",
+                "acn_scorcher",
                 1,
                 RecipeTechRegistry.DEMONIC_WORKSTATION,
                 new Ingredient[]{
@@ -257,26 +251,27 @@ public class Arcanist {
         ).showAfter("forge"));
 
         Recipes.registerModRecipe(new Recipe(
-                "packager",
+                "acn_packager",
                 1,
                 RecipeTechRegistry.DEMONIC_WORKSTATION,
                 new Ingredient[]{
                         new Ingredient("anystone", 15),
                         new Ingredient("clay", 12)
                 }
-        ).showAfter("scorcher"));
+        ).showAfter("acn_scorcher"));
 
         Recipes.registerModRecipe(new Recipe(
-                "crusher",
+                "acn_crusher",
                 1,
                 RecipeTechRegistry.DEMONIC_WORKSTATION,
                 new Ingredient[]{
                         new Ingredient("anystone", 40),
                         new Ingredient("ironbomb", 2)
                 }
-        ).showAfter("packager"));
+        ).showAfter("acn_packager"));
 
-        clusterMap.put("frostshard", "frostshard_cluster");
+        clusterMap.put("frostshard", "acn_frostshard_cluster");
+        clusterMap.put("quartz", "acn_quartz_cluster");
 
         // Add out example mob to default cave mobs.
         // Spawn tables use a ticket/weight system. In general, common mobs have about 100 tickets.

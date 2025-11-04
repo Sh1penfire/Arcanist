@@ -1,4 +1,4 @@
-package arcanist.items;
+package arcanist.items.materials;
 
 import necesse.inventory.item.matItem.MatItem;
 
@@ -6,7 +6,7 @@ import necesse.inventory.item.matItem.MatItem;
 public class PackageItem extends MatItem {
     public PackageItem(int stackSize, String... globalIngredients) {
         super(stackSize, globalIngredients);
-        setItemCategory("materials", "packages");
+        setItemCategory("materials", "acn_packages");
         keyWords.add("package");
     }
 }
