@@ -49,7 +49,7 @@ public class DrillBulletProjectile extends BulletProjectile {
     }
 
     public InventoryItem getOwnerToolSlot() {
-        Mob owner = this.getOwner();
+        Mob owner = getOwner();
         if (owner != null && owner.isPlayer) {
             PlayerInventoryManager inv = ((PlayerMob)owner).getInv();
             InventoryItem item = inv.streamInventorySlots(false, false, false, false).map(InventorySlot::getItem).filter((i) -> {
@@ -57,8 +57,7 @@ public class DrillBulletProjectile extends BulletProjectile {
             }).max((i, index) -> {
                 return (int) ((ToolDamageItem) i.item).getToolTier(i, owner);
             }).get();
-            if(item != null) return item;
-            return null;
+            return item;
         } else {
             return null;
         }

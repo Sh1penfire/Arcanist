@@ -15,7 +15,7 @@ public class HeyListen {
         //filter = new CollisionFilter().addFilter(new NoneFilter(projectile.getOwner(), original));
 
 
-        System.out.println("Exited BulletProjectile.getLevelCollisionFilter(): " + projectile.getStringID());
+        //System.out.println("Exited BulletProjectile.getLevelCollisionFilter(): " + projectile.getStringID());
     }
 }
 

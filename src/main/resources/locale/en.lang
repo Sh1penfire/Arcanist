@@ -61,3 +61,10 @@ scorcher_tip=Scorches logs and dust packages
 acn_dusts=Dusts
 acn_clusters=Clusters
 acn_packages=Clusters
+
+[acn_modifiers]
+damage=Damage: <amount>
+damage_multi=<amount> damage
+object_damage_fract=Object Damage: %<amount>
+pierce=Pierce: <amount>
+speed=Speed: <amount>

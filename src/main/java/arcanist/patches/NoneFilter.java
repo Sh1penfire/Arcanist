@@ -19,7 +19,6 @@ public class NoneFilter implements Predicate<TilePosition> {
 
     @Override
     public boolean test(TilePosition tp) {
-        System.out.println("A");
         //TODO: Setup projectile elevation
         if(true) return true;
         else return !owner.buffManager.hasBuff(ModBuffs.manasight) && original.testFilter(tp);

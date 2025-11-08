@@ -1,6 +1,7 @@
 package arcanist.content;
 
-import NecesseExpanded.Buffs.Trinkets.MidasBuff;
+import arcanist.buffs.ManachargeStackBuff;
+import arcanist.buffs.MidasBuff;
 import arcanist.buffs.PropickTrinketBuff;
 import necesse.engine.registries.BuffRegistry;
 import necesse.entity.mobs.buffs.ActiveBuff;
