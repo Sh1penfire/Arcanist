@@ -26,19 +26,20 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
-//The manacharge base actually reads from this it doesn't "generate" projectiles lololololo
-public class ProjectileGeneratorItem extends Item implements InternalInventoryItemInterface {
-    public String projectileType;
+//Look mom, im a code reuser!
+//Haha! Haha hah... ha...
+//God this is going to take awhile
+public class AmpItem extends Item implements InternalInventoryItemInterface {
+
     public int capacity;
 
     public int manaCost, reload;
 
     public ManachargeBaseItem.ProjStats stats = new ManachargeBaseItem.ProjStats();
 
-    public ProjectileGeneratorItem(int capacity, String projectileType){
+    public AmpItem(int capacity){
         super(1);
         this.capacity = capacity;
-        this.projectileType = projectileType;
         this.reload = (int) (0.125f * 1000);
     }
 
@@ -83,8 +84,12 @@ public class ProjectileGeneratorItem extends Item implements InternalInventoryIt
     }
 
     //Generator can apply its stats to the projectile stats. I might tweak this though.
-    //This comes after applying the lense stats
+    //This comes before applying the lense stats
     public void applyStats(ManachargeBaseItem.ProjStats stats){
+        System.out.println(this.stats.range);
+        System.out.println(stats.range);
         stats.applyPart(this.stats);
+        System.out.println(this.stats.range);
+        System.out.println(stats.range);
     }
 }

@@ -1,4 +1,4 @@
-package NecesseExpanded.Buffs.Trinkets;
+package arcanist.buffs;
 
 import arcanist.content.ModColors;
 import necesse.engine.util.GameRandom;

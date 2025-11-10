@@ -1,11 +1,10 @@
 package arcanist.content;
 
+import arcanist.Arcanist;
 import arcanist.items.*;
 import arcanist.items.bullets.DrillBulletItem;
 import arcanist.items.bullets.MidasBulletItem;
-import arcanist.items.manacharge.LensItem;
-import arcanist.items.manacharge.ManachargeBaseItem;
-import arcanist.items.manacharge.ProjectileGeneratorItem;
+import arcanist.items.manacharge.*;
 import arcanist.items.materials.ClusterItem;
 import arcanist.items.materials.DustItem;
 import arcanist.items.materials.PackageItem;
@@ -20,6 +19,8 @@ import necesse.inventory.item.matItem.MatItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static arcanist.Arcanist.prefixID;
 
 public class ModItems {
 
@@ -72,14 +73,35 @@ public class ModItems {
 
         ItemRegistry.registerItem("acn_charloag", charloag = new MatItem(500, "anylog").setItemCategory("materials", "logs"), 10, true);
 
-
         ItemRegistry.registerItem("acn_ore_pouch", new OrePouchItem(), 250, true);
 
         ItemRegistry.registerItem("acn_propick", new PropickTrinket(), 10, true);
 
-        ItemRegistry.registerItem("acn_manacharge", new ManachargeBaseItem(640, null), 10, true);
-        ItemRegistry.registerItem("acn_lens", new LensItem(), 10, true);
-        ItemRegistry.registerItem("acn_generator", new ProjectileGeneratorItem(), 10, true);
+        ProjectileGeneratorItem gen = new ProjectileGeneratorItem(4, "acn_ice_pellet");
+        ItemRegistry.registerItem("acn_manacharge_pistol", new RefinedManachargeItem(640, null), 10, true);
+        ItemRegistry.registerItem("acn_focal_lens", new LensItem(){{
+            pierce = 2;
+            speed = 64;
+        }}, 10, true);
+        ItemRegistry.registerItem("acn_sharp_lens", new LensItem(){{
+            damageMultiplier = 0.25f;
+            speed = 32;
+            range -= 32;
+        }}, 10, true);
+
+        ItemRegistry.registerItem("acn_drilling_lens", new LensItem(){{
+            objectDamageFract = 0.5f;
+        }}, 10, true);
+
+        ItemRegistry.registerItem("acn_generator", gen, 10, true);
+        ItemRegistry.registerItem("acn_amp", new AmpItem(2){{
+            stats.setDamage(14).setSpeed(8 * 32).setRange(16 * 32).setObjectDamageFract(2).setKnockback(25);
+        }}, 10, true);
+
+        ItemRegistry.registerItem(prefixID("example_lens"), new LensModifierItem(){{
+            additiveModifier(ModLensModifiers.damage.id, 60);
+            multiplicativeModifier(ModLensModifiers.damage.id, 60);
+        }}, 10, true);
 
         ArrayList<Integer> logs = GlobalIngredientRegistry.getGlobalIngredient("anylog").getObtainableRegisteredItemIDs();
         logs.forEach(logId -> {

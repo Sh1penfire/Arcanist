@@ -1,6 +1,7 @@
 package arcanist.content;
 
-import NecesseExpanded.Buffs.Trinkets.MidasBuff;
+import arcanist.buffs.ManachargeStackBuff;
+import arcanist.buffs.MidasBuff;
 import arcanist.buffs.PropickTrinketBuff;
 import necesse.engine.registries.BuffRegistry;
 import necesse.entity.mobs.buffs.ActiveBuff;
@@ -9,7 +10,7 @@ import necesse.entity.mobs.buffs.staticBuffs.Buff;
 
 public class ModBuffs {
     public static Buff
-    midas, propick, manasight;
+    midas, propick, manasight, manacharge;
 
     public static void load(){
         midas = BuffRegistry.registerBuff("acn_midas", new MidasBuff());
@@ -23,5 +24,7 @@ public class ModBuffs {
 
             }
         });
+
+        manacharge = BuffRegistry.registerBuff("acn_manacharge", new ManachargeStackBuff());
     }
 }

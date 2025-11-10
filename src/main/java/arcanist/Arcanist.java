@@ -6,12 +6,9 @@ import arcanist.tiles.PackagerObject;
 import arcanist.tiles.ScorcherObject;
 import necesse.engine.modLoader.annotations.ModEntry;
 import necesse.engine.registries.*;
-import necesse.inventory.item.Item;
-import necesse.inventory.item.ItemCategory;
 import necesse.inventory.recipe.Ingredient;
 import necesse.inventory.recipe.Recipe;
 import necesse.inventory.recipe.Recipes;
-import necesse.inventory.recipe.Tech;
 
 import static arcanist.content.ModItems.clusterMap;
 import static arcanist.content.ModItems.dustMap;
@@ -19,9 +16,16 @@ import static arcanist.content.ModItems.dustMap;
 @ModEntry
 public class Arcanist {
 
-    public void init() {
-        ModTechs.register();
+    //Prefix for all the mod's content & GND data keys
+    public static String ID = "acn";
 
+    public static String prefixID(String input){
+        return ID + "_" + input;
+    }
+
+    public void init() {
+        ModLensModifiers.load();
+        ModTechs.register();
         ModContainers.load();
 
         /*
@@ -61,6 +65,9 @@ public class Arcanist {
     }
 
     public void initResources() {
+        ModSounds.load();
+        ModTextures.load();
+
         // Sometimes your textures will have a black or other outline unintended under rotation or scaling
         // This is caused by alpha blending between transparent pixels and the edge
         // To fix this, run the preAntialiasTextures gradle task

@@ -5,12 +5,17 @@ import necesse.engine.localization.message.GameMessage;
 import necesse.engine.util.GameBlackboard;
 import necesse.entity.mobs.PlayerMob;
 import necesse.gfx.gameTooltips.ListGameTooltips;
+import necesse.inventory.Inventory;
 import necesse.inventory.InventoryItem;
 import necesse.inventory.item.Item;
 import necesse.inventory.item.ItemCategory;
+import necesse.inventory.item.ItemCategoryManager;
+import necesse.inventory.item.miscItem.AmmoPouch;
 import necesse.inventory.item.miscItem.PouchItem;
+import necesse.level.maps.Level;
 
 public class OrePouchItem extends PouchItem {
+
     static String category;
     public OrePouchItem() {
         this.rarity = Rarity.RARE;
@@ -24,12 +29,25 @@ public class OrePouchItem extends PouchItem {
         return tooltips;
     }
     public boolean isValidPouchItem(InventoryItem item) {
+        if(item == null || item.item == null) return false;
         return this.isValidRequestItem(item.item);
     }
 
+    public int getInventoryAmount(Level level, PlayerMob player, InventoryItem item, Item requestItem, String purpose) {
+        int amount = super.getInventoryAmount(level, player, item, requestItem, purpose);
+        if (this.isValidPurpose(this.requestPurposes, this.isRequestPurposeBlacklist, purpose, this.isPickupDisabled(item)) && this.isValidRequestItem(requestItem)) {
+            Inventory internalInventory = this.getInternalInventory(item);
+            amount += internalInventory.getAmount(level, player, requestItem, purpose);
+        }
+
+        return amount;
+    }
+
+
     public boolean isValidRequestItem(Item item) {
+        if (item == null) return false;
         category = ItemCategory.getItemsCategory(item).stringID;
-        return this.isValidRequestType(item.type) && (category.equals("ore") || category.equals("acn_dusts") || category.equals("acn_minerals") || category.equals("acn_clusters"));
+        return this.isValidRequestType(item.type) && (category.equals("ore") || category.equals("acn_dusts") || category.equals("minerals") || category.equals("acn_clusters"));
     }
 
     public boolean isValidRequestType(Item.Type type) {

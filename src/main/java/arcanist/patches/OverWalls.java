@@ -10,14 +10,6 @@ public class OverWalls {
 
     @Advice.OnMethodExit
     static void onExit(@Advice.This BulletProjectile bullet, @Advice.Return(readOnly = false) CollisionFilter filter) {
-        /*
-        CollisionFilter original = filter;
-        filter = new CollisionFilter().overrideFilter(tp -> {
-            System.out.println("A");
-            return true;
-        });
-
-         */
 
 
         System.out.println("Exited BulletProjectile.getLevelCollisionFilter(): " + bullet.getStringID());

@@ -62,7 +62,6 @@ public class PropickTrinketBuff extends TrinketBuff {
                             for (LootItemInterface i : drops.items) {
                                 LootItem loot = (LootItem) i;
                                 category = ItemCategory.getItemsCategory(ItemRegistry.getItem(loot.itemStringID)).stringID;
-                                System.out.println(category);
                                 if (category.equals("ore") || category.equals("minerals")) {
                                     added.add(LootItem.between(loot.itemStringID, 0, 1));
                                 }

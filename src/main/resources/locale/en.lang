@@ -36,6 +36,9 @@ acn_ore_pouch=Ore Pouch
 acn_drill_bullet=Drill Bullet
 acn_midas_bullet=Midas Bullet
 
+acn_focal_lens=Focal Lens
+acn_example_lens=Example Lens
+
 [itemtooltip]
 examplestafftip=Shoots a homing, piercing projectile
 propick_tip=Allow you to find extra goodies in ore!
@@ -61,3 +64,13 @@ scorcher_tip=Scorches logs and dust packages
 acn_dusts=Dusts
 acn_clusters=Clusters
 acn_packages=Clusters
+
+[acn_modifiers]
+damage=Damage: <value>
+object_damage_fract=%Object Damage: <value>
+pierce=Pierce: <value>
+speed=Speed: <value>
+
+[acn_keywords]
+enabled: Enabled
+disabled: Disabled
