@@ -1,6 +1,5 @@
 package arcanist.containers.slots;
 
-import arcanist.items.manacharge.LensItem;
 import arcanist.items.manacharge.ProjectileGeneratorItem;
 import necesse.engine.localization.Localization;
 import necesse.engine.registries.ItemRegistry;

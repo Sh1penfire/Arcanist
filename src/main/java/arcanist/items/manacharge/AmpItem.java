@@ -35,8 +35,6 @@ public class AmpItem extends Item implements InternalInventoryItemInterface {
 
     public int manaCost, reload;
 
-    public ManachargeBaseItem.ProjStats stats = new ManachargeBaseItem.ProjStats();
-
     public AmpItem(int capacity){
         super(1);
         this.capacity = capacity;
@@ -81,15 +79,5 @@ public class AmpItem extends Item implements InternalInventoryItemInterface {
     @Override
     public int getInternalInventorySize() {
         return capacity;
-    }
-
-    //Generator can apply its stats to the projectile stats. I might tweak this though.
-    //This comes before applying the lense stats
-    public void applyStats(ManachargeBaseItem.ProjStats stats){
-        System.out.println(this.stats.range);
-        System.out.println(stats.range);
-        stats.applyPart(this.stats);
-        System.out.println(this.stats.range);
-        System.out.println(stats.range);
     }
 }

@@ -1,13 +1,10 @@
 package arcanist.items.manacharge;
 
-import arcanist.content.ModBuffs;
-import arcanist.content.ModContainers;
-import arcanist.content.ModSounds;
+import arcanist.content.*;
 import arcanist.entities.projectiles.manacharge.ModularProjectileBase;
+import arcanist.util.Formatter;
 import necesse.engine.GameState;
 import necesse.engine.localization.Localization;
-import necesse.engine.network.gameNetworkData.GNDItem;
-import necesse.engine.network.gameNetworkData.GNDItemGameDamage;
 import necesse.engine.network.gameNetworkData.GNDItemMap;
 import necesse.engine.network.packet.PacketOpenContainer;
 import necesse.engine.network.server.ServerClient;
@@ -27,9 +24,9 @@ import necesse.entity.mobs.GameDamage;
 import necesse.entity.mobs.Mob;
 import necesse.entity.mobs.PlayerMob;
 import necesse.entity.mobs.buffs.ActiveBuff;
-import necesse.entity.mobs.itemAttacker.AmmoUserMob;
 import necesse.entity.mobs.itemAttacker.ItemAttackSlot;
 import necesse.entity.mobs.itemAttacker.ItemAttackerMob;
+import necesse.entity.projectile.Projectile;
 import necesse.gfx.GameResources;
 import necesse.gfx.drawOptions.itemAttack.ItemAttackDrawOptions;
 import necesse.gfx.gameFont.FontManager;
@@ -39,33 +36,31 @@ import necesse.inventory.InventoryItem;
 import necesse.inventory.PlayerInventorySlot;
 import necesse.inventory.container.Container;
 import necesse.inventory.container.ContainerActionResult;
-import necesse.inventory.container.item.EnchantingScrollContainer;
 import necesse.inventory.container.item.ItemInventoryContainer;
 import necesse.inventory.container.slots.ContainerSlot;
 import necesse.inventory.enchants.ItemEnchantment;
-import necesse.inventory.enchants.ToolItemModifiers;
 import necesse.inventory.item.ItemInteractAction;
 import necesse.inventory.item.TickItem;
 import necesse.inventory.item.miscItem.InternalInventoryItemInterface;
 import necesse.inventory.item.toolItem.ToolItem;
-import necesse.inventory.item.toolItem.projectileToolItem.gunProjectileToolItem.GunProjectileToolItem;
-import necesse.inventory.item.toolItem.projectileToolItem.magicProjectileToolItem.FrostStaffProjectileToolItem;
-import necesse.inventory.item.toolItem.summonToolItem.MagicBranchSummonToolItem;
 import necesse.inventory.lootTable.lootItem.OneOfLootItems;
 import necesse.level.maps.Level;
 
 import java.awt.*;
-import java.util.HashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ManachargeBaseItem extends ToolItem implements InternalInventoryItemInterface, TickItem, ItemInteractAction {
 
     public static int i;
+    public static GNDItemMap manachargeData;
 
     public float chargeCost, chargeRate;
-    public HashMap<Integer, LensItem> lensIndexes = new HashMap<>();
-    public HashMap<Integer, Float> multi = new HashMap<>();
+
+    //Modifications to the projectile, please don't put manacharge data in here~ (or do, it's up to you)
+    public GNDItemMap statMultipliers = new GNDItemMap(), abilityStats = new GNDItemMap();
+
+    public String tooltipKey;
 
     public ManachargeBaseItem(int enchantCost, OneOfLootItems lootTableCategory) {
         super(enchantCost, lootTableCategory);
@@ -77,12 +72,50 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
         chargeCost = 3;
         chargeRate = 5;
         damageType = DamageTypeRegistry.MAGIC;
+        tooltipKey = "manacharge_tip";
     }
+
+    public void flat(ModLensModifiers.ModifierEntry entry, float amount){
+        statMultipliers.setFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX, amount);
+    }
+
+    public void multi(ModLensModifiers.ModifierEntry entry, float amount){
+        statMultipliers.setFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX, amount);
+    }
+
+    public void flag(ModLensModifiers.ModifierEntry entry, boolean value){
+        statMultipliers.setBoolean(entry.id, value);
+    }
+
+    public void floatAbilityStat(ModLensModifiers.ModifierEntry entry, float amount){
+        abilityStats.setFloat(entry.id, amount);
+    }
+
+    public void boolAbilityStat(ModLensModifiers.ModifierEntry entry, boolean value){
+        abilityStats.setBoolean(entry.id, value);
+    }
+
+    @Override
+    public InventoryItem getDefaultItem(PlayerMob player, int amount) {
+        InventoryItem inventoryItem = super.getDefaultItem(player, amount);
+        GNDItemMap data = inventoryItem.getGndData().setBoolean(GNDKeys.MODIFIER_ITEM, true);
+        inventoryItem.setGndData(data);
+        return inventoryItem;
+    }
+
+    @Override
+    public ListGameTooltips getPreEnchantmentTooltips(InventoryItem item, PlayerMob perspective, GameBlackboard blackboard) {
+        ListGameTooltips tooltips = super.getPreEnchantmentTooltips(item, perspective, blackboard);
+        tooltips.add(Localization.translate("itemtooltip", tooltipKey));
+        GNDItemMap data = item.getGndData();
+        return Formatter.formatStats(tooltips, data, false);
+    };
 
     public boolean isValidEnchantment(InventoryItem item, ItemEnchantment enchantment) {
         return EnchantmentRegistry.magicItemEnchantments.contains(enchantment.getID());
     }
 
+    //All the inventory stuff
     @Override
     public Inventory getNewInternalInventory(InventoryItem item) {
         return InternalInventoryItemInterface.super.getNewInternalInventory(item);
@@ -122,6 +155,48 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
         ContainerRegistry.openAndSendContainer(client, p);
     }
 
+    @Override
+    public void saveInternalInventory(InventoryItem item, Inventory inventory) {
+        InternalInventoryItemInterface.super.saveInternalInventory(item, inventory);
+        sumEffects(item);
+    }
+
+    //Look it's not the most optimised but it's easier to work with and that's what I'd rather have if somebody comes knocking about how tf this works
+    //Im doing a separate run for abilities since im not modifying them
+    public void sumEffects(InventoryItem manacharge){
+        Inventory inv = getInternalInventory(manacharge);
+        if(inv.getUsedSlots() < 2) return;
+
+        ProjectileGeneratorItem generator = generatorItem(manacharge);
+
+        manachargeData = manacharge.getGndData();
+        GNDItemMap genData = generatorInventoryItem(manacharge).getGndData();
+        GNDItemMap ampData = ampInventoryItem(manacharge).getGndData();
+
+        //(base + gen.flat + amp.flat) * gen.multi * amp.multi
+        //Done in two separate phases
+        ModLensModifiers.flat.forEach((entry) -> {
+            float value = generator.baseStats.getFloat(entry.id) + statMultipliers.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + genData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + ampData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX);
+            manachargeData.setFloat(entry.id, value);
+
+            float abilityValue = abilityStats.getFloat(entry.id) + statMultipliers.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + genData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + ampData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX);
+            manachargeData.setFloat(entry.id + GNDKeys.ABILITY_SUFFIX, abilityValue);
+        });
+        ModLensModifiers.multi.forEach((entry) -> {
+            float value = manachargeData.getFloat(entry.id) * (1 + statMultipliers.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + genData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + ampData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX));
+            manachargeData.setFloat(entry.id, value);
+
+            float abilityValue = manachargeData.getFloat(entry.id + GNDKeys.ABILITY_SUFFIX) * (1 + statMultipliers.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + genData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + ampData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX));
+            manachargeData.setFloat(entry.id + GNDKeys.ABILITY_SUFFIX, abilityValue);
+        });
+        ModLensModifiers.flags.forEach((entry) -> {
+            boolean flag = genData.getBoolean(entry.id);
+            if(flag) manachargeData.setBoolean(entry.id, flag);
+        });
+
+        manacharge.getGndData().addAll(manachargeData);
+    }
+
     public void tick(Inventory inventory, int slot, InventoryItem item, GameClock clock, GameState state, Entity entity, TileEntity tileEntity, WorldSettings worldSettings, Consumer<InventoryItem> setItem) {
         this.tickInternalInventory(item, clock, state, entity, tileEntity, worldSettings);
     }
@@ -141,12 +216,6 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
         return true;
     }
 
-    public ListGameTooltips getPreEnchantmentTooltips(InventoryItem item, PlayerMob perspective, GameBlackboard blackboard) {
-        ListGameTooltips tooltips = super.getPreEnchantmentTooltips(item, perspective, blackboard);
-        tooltips.add(Localization.translate("itemtooltip", "elderlywandtip"));
-        return tooltips;
-    }
-
     public Point getItemAttackerAttackPosition(Level level, ItemAttackerMob attackerMob, Mob target, int seed, InventoryItem item) {
         return this.applyInaccuracy(attackerMob, item, new Point(target.getX(), target.getY()));
     }
@@ -154,10 +223,6 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
     public void setDrawAttackRotation(InventoryItem item, ItemAttackDrawOptions drawOptions, float attackDirX, float attackDirY, float attackProgress) {
         drawOptions.pointRotation(attackDirX, attackDirY);
         drawOptions.itemBeforeHand();
-    }
-
-    public ProjStats baseStats(InventoryItem item){
-        return new ProjStats().applyPart(generatorItem(item).stats);
     }
 
     public void draw(InventoryItem item, PlayerMob perspective, int x, int y, boolean inInventory) {
@@ -203,66 +268,6 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
         return Math.round(generatorItem(item).reload * (1.0f / this.getAttackSpeedModifier(item, attackerMob)));
     }
 
-    public ProjStats stats(InventoryItem item, ProjectileGeneratorItem generator, Inventory generatorInv, AmpItem amplifier){
-
-        lensIndexes.clear();
-        multi.clear();
-        for (i = 0; i < generatorInv.getSize(); i++) {
-            InventoryItem lens = generatorInv.getItem(i);
-            if(lens == null) continue;
-            LensItem lensItem = (LensItem) lens.item;
-            lensIndexes.put(i, lensItem);
-            lensItem.amp.forEach((index, amount) -> {
-                if(multi.containsKey(index + i)){
-                    multi.put(index, multi.get(index + i) + amount);
-                }
-                else multi.put(index + i, amount);
-            });
-        }
-
-        //Pass this off to each lens with the amplification values
-        ProjStats stats = new ProjStats();
-
-        lensIndexes.forEach((index, lensItem) -> {
-            lensItem.modify(stats, multi.containsKey(index) ? multi.get(index) : 1, lensIndexes);
-        });
-
-        generator.applyStats(stats);
-
-        amplifier.applyStats(stats);
-
-        return stats;
-    }
-
-    public ProjStats abilityStats(InventoryItem item, Inventory generatorInv, AmpItem amplifier){
-
-        lensIndexes.clear();
-        multi.clear();
-        for (i = 0; i < generatorInv.getSize(); i++) {
-            InventoryItem lens = generatorInv.getItem(i);
-            if(lens == null) continue;
-            LensItem lensItem = (LensItem) lens.item;
-            lensIndexes.put(i, lensItem);
-            lensItem.amp.forEach((index, amount) -> {
-                if(multi.containsKey(index + i)){
-                    multi.put(index, multi.get(index + i) + amount);
-                }
-                else multi.put(index + i, amount);
-            });
-        }
-
-        //Pass this off to each lens with the amplification values
-        ProjStats stats = baseStats(item);
-
-        lensIndexes.forEach((index, lensItem) -> {
-            lensItem.modify(stats, multi.containsKey(index) ? multi.get(index) : 1, lensIndexes);
-        });
-
-        amplifier.applyStats(stats);
-
-        return stats;
-    }
-
     public InventoryItem generatorInventoryItem(InventoryItem manacharge){
         return getInternalInventory(manacharge).getItem(0);
     }
@@ -277,92 +282,58 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
         return (AmpItem) getInternalInventory(manacharge).getItem(1).item;
     }
 
-    public void modifyProjectile(Level level, InventoryItem item, ItemAttackerMob attackerMob, int x, int y, ModularProjectileBase projectile, ProjStats stats, int seed){
-
-        //Projectile stats
-        projectile.setLevel(level);
-        projectile.x = attackerMob.x;
-        projectile.y = attackerMob.y;
-        projectile.setTarget(x, y);
-        projectile.speed = stats.speed;
-        projectile.knockback = (int) stats.knockback;
-        projectile.setDistance((int) (stats.range * (1 + stats.rangeMultiplier)));
-        projectile.bouncing = (int) stats.bounce;
-        projectile.piercing = (int) stats.pierce;
-        projectile.objectDamageFract = stats.objectDamageFract;
-
-        projectile.setOwner(attackerMob);
-        projectile.resetUniqueID(new GameRandom((long)seed));
-
-        GameDamage damage = new GameDamage(stats.damage * (1 + stats.damageMultiplier)).enchantedDamage(this.getEnchantment(item), ToolItemModifiers.DAMAGE, ToolItemModifiers.ARMOR_PEN, ToolItemModifiers.CRIT_CHANCE);
-        GNDItemMap gndData = item.getGndData();
-        float finalDamageModifier;
-        if (gndData.hasKey("finalDamageMod")) {
-            finalDamageModifier = Math.max(0.0F, gndData.getFloat("finalDamageMod"));
-            damage = damage.modFinalMultiplier(finalDamageModifier);
-        }
-
-        if (gndData.hasKey("damageMod")) {
-            finalDamageModifier = Math.max(0.0F, gndData.getFloat("damageMod"));
-            damage = damage.modDamage(finalDamageModifier);
-        }
-        projectile.setDamage(damage);
-    }
-
     public InventoryItem onAttack(Level level, int x, int y, ItemAttackerMob attackerMob, int attackHeight, InventoryItem item, ItemAttackSlot slot, int animAttack, int seed, GNDItemMap mapContent) {
-        Inventory inv = getInternalInventory(item);
-        InventoryItem generatorItem = inv.getItem(0);
 
-        float charge = item.getGndData().getFloat("acn_charge", 0);
-        charge += Math.max(1, 1 + getCritChance(item, attackerMob)) * chargeRate;
-        while(charge >= 100){
-            charge -= 100;
-            attackerMob.buffManager.addBuff(new ActiveBuff(ModBuffs.manacharge, attackerMob, 10 * 1000, null), level.isServer());
+        if(level.isServer()){
+            float charge = item.getGndData().getFloat("acn_charge", 0);
+            charge += Math.max(1, 1 + getCritChance(item, attackerMob)) * chargeRate;
+            while(charge >= 100){
+                charge -= 100;
+                attackerMob.buffManager.addBuff(new ActiveBuff(ModBuffs.manacharge, attackerMob, 10 * 1000, null), level.isServer());
+            }
+            item.getGndData().setFloat("acn_charge", charge);
         }
-        item.getGndData().setFloat("acn_charge", charge);
 
-        ProjectileGeneratorItem generator = (ProjectileGeneratorItem) generatorItem.item;
+        ProjectileGeneratorItem generator = generatorItem(item);
 
-        Inventory generatorInv = generator.getInternalInventory(generatorItem);
+        Projectile projectile = getProjectile(item.getGndData(), generator.projectileType, level, x, y, attackerMob);
 
-        AmpItem amp = ampItem(item);
-
-        ModularProjectileBase projectile = (ModularProjectileBase) ProjectileRegistry.getProjectile(generator.projectileType);
-
-        //Pass this off to each lens with the amplification values
-        ProjStats stats = stats(item, generator, generatorInv, amp);
-
-        modifyProjectile(level, item, attackerMob, x, y, projectile, stats, seed);
-
+        projectile.getUniqueID(new GameRandom(seed));
         attackerMob.addAndSendAttackerProjectile(projectile, 20);
+
         this.consumeMana(attackerMob, item);
 
         return item;
     }
 
-    public GameDamage getFlatAttackDamage(InventoryItem item) {
-        GNDItemMap gndData = item.getGndData();
-        if (gndData.hasKey("damage")) {
-            GNDItem gndItem = gndData.getItem("damage");
-            if (gndItem instanceof GNDItemGameDamage) {
-                return ((GNDItemGameDamage)gndItem).damage;
-            }
+    public ModularProjectileBase getProjectile(GNDItemMap stats, String projectileID, Level level, float x, float y, Mob owner){
+        float velocity = stats.getFloat(ModLensModifiers.speed.id);
+        int range = (int) stats.getFloat(ModLensModifiers.range.id);
+        GameDamage damage = new GameDamage(stats.getFloat(ModLensModifiers.damage.id));
+        int knockback = (int) stats.getFloat(ModLensModifiers.knockback.id);
+        ModularProjectileBase proj = (ModularProjectileBase) ProjectileRegistry.getProjectile(projectileID, level, owner.getX(), owner.getY(), x, y, velocity, range, damage, knockback, owner);
+        proj.setStats(stats);
+        return proj;
+    };
 
-            if (gndItem instanceof GNDItem.GNDPrimitive) {
-                float damage = ((GNDItem.GNDPrimitive)gndItem).getFloat();
-                return new GameDamage(this.getDamageType(item), damage);
-            }
-        }
-
-        return new GameDamage(this.getDamageType(item), this.attackDamage.getValue(this.getUpgradeTier(item)));
-    }
+    //Not all manacharges will use this
+    public ModularProjectileBase getAbilityProjectile(GNDItemMap stats, String projectileID, Level level, float x, float y, Mob owner){
+        float velocity = stats.getFloat(ModLensModifiers.speed.id + GNDKeys.ABILITY_SUFFIX);
+        int range = (int) stats.getFloat(ModLensModifiers.range.id + GNDKeys.ABILITY_SUFFIX);
+        GameDamage damage = new GameDamage(stats.getFloat(ModLensModifiers.damage.id + GNDKeys.ABILITY_SUFFIX));
+        int knockback = (int) stats.getFloat(ModLensModifiers.knockback.id + GNDKeys.ABILITY_SUFFIX);
+        ModularProjectileBase proj = (ModularProjectileBase) ProjectileRegistry.getProjectile(projectileID, level, owner.getX(), owner.getY(), x, y, velocity, range, damage, knockback, owner);
+        proj.fromAbility = true;
+        proj.setStats(stats);
+        return proj;
+    };
 
     public void showAttack(Level level, int x, int y, ItemAttackerMob attackerMob, int attackHeight, InventoryItem item, int animAttack, int seed, GNDItemMap mapContent) {
         if (level.isClient()) {
             //this.playAttackSound(attackerMob);
         }
-
     }
+
     @Override
     protected SoundSettings getAttackSound() {
         return (new SoundSettings(GameResources.handgun)).volume(0.8f);
@@ -370,91 +341,5 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
 
     public SoundSettings getAbilitySound(){
         return (new SoundSettings(ModSounds.sawCharge).volume(1));
-    }
-
-    public static class ProjStats{
-        public float damage;
-        public float damageMultiplier;
-        public float knockback;
-        public float speed;
-        public float homingPower;
-        public float homingRange;
-        public float objectDamageFract;
-        public float lifestealFract;
-        public float range;
-        public float rangeMultiplier;
-
-        public float
-                pierce;
-        public float bounce;
-
-        //This calculcates the final stats as if it was a projectile gen or amp modifying the stats, so multipliers go directly onto the stats
-        public ProjStats applyPart(ProjStats stats){
-            damage += stats.damage;
-            damage *= (1 + damageMultiplier);
-            knockback += stats.knockback;
-            speed += stats.speed;
-            homingPower += stats.homingPower;
-            homingRange += stats.homingRange;
-            objectDamageFract *= (1 + stats.objectDamageFract);
-            lifestealFract += stats.lifestealFract;
-
-            range += stats.range;
-            range *= (1 + stats.rangeMultiplier);
-
-            pierce += stats.pierce;
-            bounce += stats.bounce;
-            return this;
-        }
-
-        public ProjStats setDamage(float damage) {
-            this.damage = damage;
-            return this;
-        }
-
-        public ProjStats setKnockback(float knockback) {
-            this.knockback = knockback;
-            return this;
-        }
-
-        public ProjStats setSpeed(float speed) {
-            this.speed = speed;
-            return this;
-        }
-
-        public ProjStats setHomingPower(float homingPower) {
-            this.homingPower = homingPower;
-            return this;
-        }
-
-        public ProjStats setHomingRange(float homingRange) {
-            this.homingRange = homingRange;
-            return this;
-        }
-
-        public ProjStats setObjectDamageFract(float objectDamageFract) {
-            this.objectDamageFract = objectDamageFract;
-            return this;
-        }
-
-        public ProjStats setLifestealFract(float lifestealFract) {
-            this.lifestealFract = lifestealFract;
-            return this;
-        }
-
-        public ProjStats setRange(float range) {
-            this.range = range;
-            return this;
-        }
-
-        public ProjStats setPierce(float pierce) {
-            this.pierce = pierce;
-            return this;
-        }
-
-        public ProjStats setBounce(float bounce) {
-            this.bounce = bounce;
-            return this;
-        }
     }
 }

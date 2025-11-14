@@ -1,12 +1,15 @@
 package arcanist.content;
 
+import arcanist.util.Formatter;
+import necesse.inventory.item.placeableItem.consumableItem.potionConsumableItem.resourcePotions.ManaPotionItem;
+
 import java.util.ArrayList;
 
 import static arcanist.content.ModLensModifiers.ModifierEntry.*;
 
-//The recognised list of modifiers, which the mod will pull from for things like tooltips.
+//The recognised list of stats modifiers, which the mod will pull from for things like tooltips.
 public class ModLensModifiers {
-    public static ArrayList<ModifierEntry> additiveModifiers = new ArrayList<>(), multiplicativeModifiers = new ArrayList<>(), flagModifiers = new ArrayList<>();
+    public static ArrayList<ModifierEntry> flat = new ArrayList<>(), multi = new ArrayList<>(), flags = new ArrayList<>(), nonFlags = new ArrayList<>();
 
     public static ModifierEntry
     damage,
@@ -14,7 +17,9 @@ public class ModLensModifiers {
     speed,
     homingPower,
     homingRange,
+    explosionPower,
     objectDamageFract,
+    lifestealFract,
     range,
     pierce,
     bounce;
@@ -23,13 +28,18 @@ public class ModLensModifiers {
     public static void load(){
         damage = pair("damage");
         knockback = pair("knockback");
-        speed = pair("speed");
-        homingPower = pair("homingPower");
-        homingRange = pair("homingRange");
-        objectDamageFract = pair("objectDamageFract");
-        range = pair("range");
         pierce = pair("pierce");
         bounce = pair("bounce");
+        speed = pair("speed");
+        range = pair("range");
+        speed.unit = Formatter.Unit.tilesPerSecond;
+        range.unit = Formatter.Unit.tiles;
+        homingPower = pair("homingPower");
+        homingRange = pair("homingRange");
+        explosionPower = pair("explosionPower");
+        objectDamageFract = pair("objectDamageFract");
+        objectDamageFract.unit = Formatter.Unit.objectDamage;
+        lifestealFract = pair("lifestealFract");
     }
 
     public static class ModifierEntry{
@@ -39,29 +49,35 @@ public class ModLensModifiers {
         }
         public String id;
         public ModifierType type;
+        //Can be null
+        public Formatter.Unit unit;
 
-        public static ModifierEntry additive(String id){
+        public static ModifierEntry flat(String id){
             ModifierEntry entry = new ModifierEntry(id, ModifierType.NUMBER);
-            additiveModifiers.add(entry);
+            flat.add(entry);
+            nonFlags.add(entry);
             return entry;
         }
-        public static ModifierEntry multiplicative(String id){
+        public static ModifierEntry multi(String id){
             ModifierEntry entry = new ModifierEntry(id, ModifierType.NUMBER);
-            multiplicativeModifiers.add(entry);
+            multi.add(entry);
+            nonFlags.add(entry);
             return entry;
         }
         public static ModifierEntry flag(String id){
             ModifierEntry entry = new ModifierEntry(id, ModifierType.FLAG);
-            multiplicativeModifiers.add(entry);
+            multi.add(entry);
             return entry;
         }
 
         public static ModifierEntry pair(String id){
             ModifierEntry entry = new ModifierEntry(id, ModifierType.NUMBER);
-            additiveModifiers.add(entry);
-            multiplicativeModifiers.add(entry);
+            flat.add(entry);
+            multi.add(entry);
+            nonFlags.add(entry);
             return entry;
         }
+
     }
 
     public enum ModifierType{

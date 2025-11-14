@@ -18,6 +18,10 @@ acn_gold_dust=Gold Dust
 acn_runestone_paste=Runestone Paste
 acn_ivy_paste=Ivy Paste
 
+acn_focal_lens=Focal Lens
+acn_drilling_lens=Drilling Lens
+acn_sharp_lens=Sharp Lens
+
 acn_copper_dust_package=Copper Dust Package
 acn_iron_dust_package=Iron Dust Package
 acn_gold_dust_package=Gold Dust Package
@@ -40,7 +44,6 @@ acn_focal_lens=Focal Lens
 acn_example_lens=Example Lens
 
 [itemtooltip]
-examplestafftip=Shoots a homing, piercing projectile
 propick_tip=Allow you to find extra goodies in ore!
 midasammo_tip=Makes mobs drop gold on hit!
 drillammo_tip=Damages Objects\nScales with both ranged and tool damage modifiers!
@@ -55,6 +58,8 @@ crusher_tip=Smashes items down into finer bits
 packager_tip=Packages material into containers
 scorcher_tip=Scorches logs and dust packages
 
+manacharge_tip=Shoots projectiles based on slotted items
+
 [mob]
 
 [buff]
@@ -67,8 +72,9 @@ acn_packages=Clusters
 
 [acn_modifiers]
 damage=Damage: <value>
-object_damage_fract=%Object Damage: <value>
+objectDamageFract=Object Damage: <value>
 pierce=Pierce: <value>
+range=Range: <value>
 speed=Speed: <value>
 
 [acn_keywords]

@@ -2,7 +2,6 @@ package arcanist.content;
 
 import arcanist.entities.projectiles.DrillBulletProjectile;
 import arcanist.entities.projectiles.MidasBulletProjectile;
-import arcanist.entities.projectiles.manacharge.BrickBreakerProjectile;
 import arcanist.entities.projectiles.manacharge.IcePelletProjectile;
 import arcanist.entities.projectiles.manacharge.SawbladeProjectile;
 import necesse.engine.registries.ProjectileRegistry;
@@ -13,7 +12,6 @@ public class ModProjectiles {
         ProjectileRegistry.registerProjectile("acn_drill_bullet", DrillBulletProjectile.class, "acn_drill_bullet", "acn_drill_bullet_shadow");
 
         ProjectileRegistry.registerProjectile("acn_ice_pellet", IcePelletProjectile.class, "acn_ice_pellet", "acn_ice_pellet_shadow");
-        ProjectileRegistry.registerProjectile("acn_void_ball", BrickBreakerProjectile.class, "acn_void_ball", "acn_void_ball_shadow");
         ProjectileRegistry.registerProjectile("acn_sawblade", SawbladeProjectile.class, "acn_sawblade", "acn_sawblade_shadow");
 
     }

@@ -148,6 +148,7 @@ public class Arcanist {
 
     public void postInit() {
         UpdateAmmoTypes.update();
+        UpdateCategories.update();
         // Add recipes
         setupCrushing("copperbar", "copperore", "acn_copper_dust", "acn_copper_dust_package", 1);
         setupCrushing("ironbar", "ironore", "acn_iron_dust", "acn_iron_dust_package", 1);

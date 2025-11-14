@@ -1,9 +1,11 @@
 package arcanist.entities.projectiles.manacharge;
 
+import arcanist.content.ModLensModifiers;
 import arcanist.entities.projectiles.DrillBulletProjectile;
 import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.engine.network.PacketReader;
 import necesse.engine.network.PacketWriter;
+import necesse.engine.network.gameNetworkData.GNDItemMap;
 import necesse.engine.network.server.ServerClient;
 import necesse.entity.levelEvent.LevelEvent;
 import necesse.entity.levelEvent.mobAbilityLevelEvent.MobHealthChangeEvent;
@@ -12,8 +14,10 @@ import necesse.entity.mobs.Mob;
 import necesse.entity.mobs.PlayerMob;
 import necesse.entity.mobs.buffs.BuffModifiers;
 import necesse.entity.projectile.BombProjectile;
+import necesse.entity.projectile.IronArrowProjectile;
 import necesse.entity.projectile.Projectile;
 import necesse.entity.projectile.RicochetableProjectile;
+import necesse.entity.projectile.bulletProjectile.BulletProjectile;
 import necesse.gfx.camera.GameCamera;
 import necesse.gfx.drawables.LevelSortedDrawable;
 import necesse.gfx.drawables.OrderableDrawables;
@@ -22,6 +26,7 @@ import necesse.inventory.InventorySlot;
 import necesse.inventory.PlayerInventoryManager;
 import necesse.inventory.item.placeableItem.consumableItem.potionConsumableItem.resourcePotions.HealthPotionItem;
 import necesse.inventory.item.toolItem.ToolDamageItem;
+import necesse.inventory.item.toolItem.projectileToolItem.gunProjectileToolItem.GunProjectileToolItem;
 import necesse.inventory.item.toolItem.projectileToolItem.magicProjectileToolItem.BloodGrimoireProjectileToolItem;
 import necesse.level.maps.Level;
 import necesse.level.maps.LevelObjectHit;
@@ -42,13 +47,21 @@ public class ModularProjectileBase extends Projectile implements RicochetablePro
         super();
     }
 
+    public void read(GNDItemMap data){
+        homingPower = data.getFloat(ModLensModifiers.homingRange.id);
+        explosionPower = data.getFloat(ModLensModifiers.explosionPower.id);
+        objectDamageFract = data.getFloat(ModLensModifiers.objectDamageFract.id);
+        lifestealFract = data.getFloat(ModLensModifiers.lifestealFract.id);
+    }
+
+
+    public boolean fromAbility;
     //Im going to have to add properties for all this stuff and it's going to be painful and absolutely not soul crushing hahahahahahahahahahahahahahahaha
     //Yeah this is going to be one of those projectiles
     public float homingPower;
     public float explosionPower;
     public float objectDamageFract;
     public float lifestealFract;
-    public int mineTier;
 
     //But heres the kicker
     //h a h a h a h a h
@@ -58,6 +71,16 @@ public class ModularProjectileBase extends Projectile implements RicochetablePro
 
     //Knockback and damage already exist so ill just leave those
 
+    public void setStats(GNDItemMap stats){
+        String suffix = fromAbility ? "_ability" : "";
+        homingPower = stats.getFloat(ModLensModifiers.homingPower.id + suffix);
+        explosionPower = stats.getFloat(ModLensModifiers.explosionPower.id + suffix);
+        objectDamageFract = stats.getFloat(ModLensModifiers.objectDamageFract.id + suffix);
+        lifestealFract = stats.getFloat(ModLensModifiers.lifestealFract.id + suffix);
+        piercing = (int) stats.getFloat(ModLensModifiers.pierce.id + suffix);
+        bouncing = (int) stats.getFloat(ModLensModifiers.bounce.id + suffix);
+    }
+
     public void setupSpawnPacket(PacketWriter writer) {
         super.setupSpawnPacket(writer);
         writer.putNextFloat(homingPower);
@@ -65,7 +88,7 @@ public class ModularProjectileBase extends Projectile implements RicochetablePro
         writer.putNextFloat(objectDamageFract);
         writer.putNextFloat(lifestealFract);
         writer.putNextFloat(AOE);
-        writer.putNextInt(mineTier);
+        writer.putNextBoolean(fromAbility);
     }
 
     public void applySpawnPacket(PacketReader reader) {
@@ -75,7 +98,7 @@ public class ModularProjectileBase extends Projectile implements RicochetablePro
         objectDamageFract = reader.getNextFloat();
         lifestealFract = reader.getNextFloat();
         AOE = reader.getNextFloat();
-        mineTier = reader.getNextInt();
+        fromAbility= reader.getNextBoolean();
     }
 
     @Override
@@ -100,7 +123,6 @@ public class ModularProjectileBase extends Projectile implements RicochetablePro
         } else {
             return null;
         }
-
     }
 
     public void applyDamage(Mob mob, float x, float y, float knockbackDirX, float knockbackDirY) {
@@ -110,30 +132,33 @@ public class ModularProjectileBase extends Projectile implements RicochetablePro
     @Override
     public void doHitLogic(Mob mob, LevelObjectHit object, float x, float y) {
         super.doHitLogic(mob, object, x, y);
-        Level level = getLevel();
 
-        if(getOwner().isPlayer && object != null) {
-            PlayerMob player = (PlayerMob) getOwner();
-            ServerClient client = player != null && player.isServerClient() ? player.getServerClient() : null;
-
-            InventoryItem invItem = getOwnerToolSlot();
-            ToolDamageItem item = null;
-            if(invItem != null) item = (ToolDamageItem) invItem.item;
-            float mineTier = -1f;
-            if(item != null) {
-                mineTier = item.getToolTier(invItem, getOwner());
-            }
-
-            Attacker attacker = item == null ? new DrillBulletProjectile.DrillbulletAttacker(getOwner()) : new ToolDamageItem.ToolDamageItemAttacker(getOwner(), invItem);
-            float attackDamage = getDamage().getBuffedDamage(attacker);
-            attackDamage *= getOwner().buffManager.getModifier(BuffModifiers.TOOL_DAMAGE);
-            attackDamage += getOwner().buffManager.getModifier(BuffModifiers.TOOL_DAMAGE_FLAT);
-
-            //Applies after tool damage flat so that people don't accidentally destroy their entire house with this
-            attackDamage *= objectDamageFract;
-
-            //Look if people shoot a splitting projectile inside their house with infinibounce its not my fault anymore
-            object.level.entityManager.doObjectDamage(object.getLevelObject().layerID, object.tileX, object.tileY, (int) attackDamage, mineTier, attacker, client, true, object.tileX * 32, object.tileY * 32);
+        if(object != null && getOwner().isPlayer) {
+            hitObject(mob, object, x, y);
         }
+
+    }
+
+    public void hitObject(Mob mob, LevelObjectHit object, float x, float y){
+        PlayerMob player = (PlayerMob) getOwner();
+        if(player == null) return;
+        ServerClient client = player.isServerClient() ? player.getServerClient() : null;
+
+        InventoryItem invItem = getOwnerToolSlot();
+        if(invItem == null || invItem.item == null) return;
+        ToolDamageItem item = (ToolDamageItem) invItem.item;
+
+        float mineTier = item.getToolTier(invItem, getOwner());
+
+        Attacker attacker = item == null ? new DrillBulletProjectile.DrillbulletAttacker(getOwner()) : new ToolDamageItem.ToolDamageItemAttacker(getOwner(), invItem);
+        float attackDamage = getDamage().getBuffedDamage(attacker);
+        attackDamage += getOwner().buffManager.getModifier(BuffModifiers.TOOL_DAMAGE_FLAT);
+        attackDamage *= getOwner().buffManager.getModifier(BuffModifiers.TOOL_DAMAGE);
+
+        //Applies after tool damage flat so that people don't accidentally destroy their entire house with this
+        attackDamage *= objectDamageFract;
+
+        //Look if people shoot a splitting projectile inside their house with infinibounce its not my fault anymore
+        object.level.entityManager.doObjectDamage(object.getLevelObject().layerID, object.tileX, object.tileY, (int) attackDamage, mineTier, attacker, client, true, object.tileX * 32, object.tileY * 32);
     }
 }

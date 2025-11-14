@@ -1,7 +1,6 @@
 package arcanist.containers.slots;
 
 import arcanist.items.manacharge.AmpItem;
-import arcanist.items.manacharge.LensItem;
 import necesse.engine.localization.Localization;
 import necesse.engine.registries.ItemRegistry;
 import necesse.inventory.Inventory;
