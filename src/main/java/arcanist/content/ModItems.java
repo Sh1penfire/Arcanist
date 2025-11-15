@@ -15,6 +15,9 @@ import necesse.gfx.GameColor;
 import necesse.inventory.item.Item;
 import necesse.inventory.item.ItemCategory;
 import necesse.inventory.item.matItem.MatItem;
+import necesse.inventory.item.miscItem.TelescopeItem;
+import necesse.inventory.item.trinketItem.TrinketItem;
+import necesse.inventory.item.upgradeUtils.FloatUpgradeValue;
 
 import java.util.HashMap;
 
@@ -77,11 +80,16 @@ public class ModItems {
         registerItem("acn_propick", new PropickTrinket(), 10, true);
 
         registerItem("acn_manacharge_pistol", new RefinedManachargeItem(640, null){{
+
+            manaCost = new FloatUpgradeValue(1, 0.25f);
+
             floatAbilityStat(ModLensModifiers.damage, 48);
             floatAbilityStat(ModLensModifiers.range, 48 * 32);
             floatAbilityStat(ModLensModifiers.speed, 4 * 32);
             floatAbilityStat(ModLensModifiers.bounce, 8);
             floatAbilityStat(ModLensModifiers.pierce, 8);
+
+            flat(ModLensModifiers.bursts, 2);
         }}, 10, true);
 
         registerItem("acn_focal_lens", new LensModifierItem(){{
@@ -97,15 +105,25 @@ public class ModItems {
         registerItem("acn_drilling_lens", new LensModifierItem(){{
             flat(ModLensModifiers.objectDamageFract.id, 0.5f);
         }}, 10, true);
+        registerItem(prefixID("icicle_generator"), new ProjectileGeneratorItem(2, prefixID("ice_pellet")){{
+            floatStat(ModLensModifiers.damage, 12);
+            floatStat(ModLensModifiers.range, 12 * 32);
+            floatStat(ModLensModifiers.speed, 8 * 32);
 
-        registerItem("acn_MINUS", new LensModifierItem(){{
-            flat(ModLensModifiers.objectDamageFract.id, -0.5f);
+        }}, 150, true);
+        registerItem(prefixID("gilded_amp"), new AmpItem(0){{
+            multi(ModLensModifiers.damage, 0.25f);
         }}, 10, true);
 
+
+        //EXAMPLE GENERATOR, AMP AND LENS
         registerItem("acn_generator", new ProjectileGeneratorItem(4, "acn_ice_pellet"){{
             floatStat(ModLensModifiers.damage, 12);
             floatStat(ModLensModifiers.range, 12 * 32);
             floatStat(ModLensModifiers.speed, 8 * 32);
+        }}, 10, true);
+        registerItem("acn_MINUS", new LensModifierItem(){{
+            flat(ModLensModifiers.objectDamageFract.id, -0.5f);
         }}, 10, true);
         registerItem("acn_amp", new AmpItem(2){{
             //

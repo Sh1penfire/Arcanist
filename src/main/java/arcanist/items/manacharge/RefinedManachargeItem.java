@@ -1,5 +1,6 @@
 package arcanist.items.manacharge;
 
+import arcanist.content.ModLensModifiers;
 import arcanist.entities.projectiles.manacharge.ModularProjectileBase;
 import arcanist.items.attackhandler.BurstManachargeHandler;
 import necesse.engine.network.gameNetworkData.GNDItemMap;
@@ -34,7 +35,7 @@ public class RefinedManachargeItem extends ManachargeBaseItem{
     @Override
     public InventoryItem onAttack(Level level, int x, int y, ItemAttackerMob attackerMob, int attackHeight, InventoryItem item, ItemAttackSlot slot, int animAttack, int seed, GNDItemMap mapContent) {
 
-        attackerMob.startAttackHandler(new BurstManachargeHandler(attackerMob, slot, item, this, seed, x, y));
+        attackerMob.startAttackHandler(new BurstManachargeHandler(attackerMob, slot, item, this, seed, x, y, Math.max(1, 1 + (int) item.getGndData().getFloat(ModLensModifiers.bursts.id))));
         return item;
     }
 }

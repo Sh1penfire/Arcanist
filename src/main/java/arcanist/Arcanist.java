@@ -281,6 +281,65 @@ public class Arcanist {
         clusterMap.put("frostshard", "acn_frostshard_cluster");
         clusterMap.put("quartz", "acn_quartz_cluster");
 
+        Recipes.registerModRecipe(new Recipe(
+                prefixID("icicle_generator"),
+                1,
+                RecipeTechRegistry.DEMONIC_ANVIL,
+                new Ingredient[]{
+                        new Ingredient("anylog", 30),
+                        new Ingredient("demonicbar", 10),
+                        new Ingredient(prefixID("runed_steel"), 12)
+                }
+        ));
+        Recipes.registerModRecipe(new Recipe(
+                prefixID("gilded_amp"),
+                1,
+                RecipeTechRegistry.DEMONIC_ANVIL,
+                new Ingredient[]{
+                        new Ingredient("batwing", 4),
+                        new Ingredient("sapphire", 3),
+                        new Ingredient(prefixID("gold_dust"), 24)
+                }
+        ));
+        Recipes.registerModRecipe(new Recipe(
+                prefixID("manacharge_pistol"),
+                1,
+                RecipeTechRegistry.DEMONIC_ANVIL,
+                new Ingredient[]{
+                        new Ingredient("anylog", 9),
+                        new Ingredient(prefixID("runed_steel"), 20)
+                }
+        ));
+
+
+        Recipes.registerModRecipe(new Recipe(
+                prefixID("focal_lens"),
+                1,
+                RecipeTechRegistry.DEMONIC_ANVIL,
+                new Ingredient[]{
+                        new Ingredient("glass", 5),
+                        new Ingredient(prefixID("runed_steel"), 3)
+                }
+        ));
+        Recipes.registerModRecipe(new Recipe(
+                prefixID("sharp_lens"),
+                1,
+                RecipeTechRegistry.DEMONIC_ANVIL,
+                new Ingredient[]{
+                        new Ingredient("glass", 5),
+                        new Ingredient(prefixID("runed_steel"), 3)
+                }
+        ).showAfter(prefixID("focal_lens")));
+        Recipes.registerModRecipe(new Recipe(
+                prefixID("drilling_lens"),
+                1,
+                RecipeTechRegistry.DEMONIC_ANVIL,
+                new Ingredient[]{
+                        new Ingredient("glass", 5),
+                        new Ingredient(prefixID("runed_steel"), 3)
+                }
+        ).showAfter(prefixID("sharp_lens")));
+
         // Add out example mob to default cave mobs.
         // Spawn tables use a ticket/weight system. In general, common mobs have about 100 tickets.
         //Biome.defaultCaveMobs.add(100, "examplemob");

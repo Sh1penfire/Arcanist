@@ -57,7 +57,7 @@ public class ModifierItem extends Item {
     public ListGameTooltips getTooltips(InventoryItem item, PlayerMob perspective, GameBlackboard blackboard) {
         ListGameTooltips tooltips = super.getTooltips(item, perspective, blackboard);
         GNDItemMap data = item.getGndData();
-        return Formatter.formatModifiers(tooltips, data, false);
+        return Formatter.formatModifiers(tooltips, data, false, false);
     };
 
     //I feel like this code has the potential to be absolutely terrible if ran in quick succession

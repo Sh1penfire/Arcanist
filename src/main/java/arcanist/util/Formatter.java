@@ -29,7 +29,7 @@ public class Formatter {
         return value/unit.conversionRate + " " + unit.suffix;
     }
 
-    public static ListGameTooltips formatModifiers(ListGameTooltips tooltip, GNDItemMap data, boolean all){
+    public static ListGameTooltips formatModifiers(ListGameTooltips tooltip, GNDItemMap data, boolean all, boolean sign){
         //I think it's more efficient to just have the one check for all rather than shoving it into every single value check here
         if(all){
             ModLensModifiers.flat.forEach(modifier -> {
@@ -39,7 +39,8 @@ public class Formatter {
             });
             ModLensModifiers.multi.forEach(modifier -> {
             float value = (float) Math.ceil(data.getFloat(modifier.id + GNDKeys.MULTIPLICATIVE_SUFFIX) * 100);
-            tooltip.add(Localization.translate("acn_modifiers", modifier.id, "value", Formatter.sign(value) + (modifier.unit != null ? formatUnit(value, modifier.unit) : value)) + "%");
+            if(!sign) Math.max(value + 1, 0);
+            tooltip.add(Localization.translate("acn_modifiers", modifier.id, "value", sign ? Formatter.sign(value) : "x" + (modifier.unit != null ? formatUnit(value, modifier.unit) : value)) + "%");
             });
             //Realistically if the flag is there it's enabled
             ModLensModifiers.flags.forEach(modifier -> {
@@ -55,8 +56,10 @@ public class Formatter {
             });
             ModLensModifiers.multi.forEach(modifier -> {
                 float value = (float) Math.ceil(data.getFloat(modifier.id + GNDKeys.MULTIPLICATIVE_SUFFIX) * 100);
-                if (value != 0)
-                    tooltip.add(Localization.translate("acn_modifiers", modifier.id, "value", Formatter.sign(value) + (modifier.unit != null ? formatUnit(value, modifier.unit) : value)) + "%");
+                if (sign ? value != 0 : value > 0) {
+                    if(!sign) value += 100;
+                    tooltip.add(Localization.translate("acn_modifiers", modifier.id, "value", sign ? Formatter.sign(value) : "x" + (modifier.unit != null ? formatUnit(value, modifier.unit) : value)) + "%");
+                }
             });
             //Realistically if the flag is there it's enabled
             ModLensModifiers.flags.forEach(modifier -> {

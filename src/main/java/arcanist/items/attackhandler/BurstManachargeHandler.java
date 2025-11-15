@@ -25,19 +25,20 @@ public class BurstManachargeHandler extends MouseAngleAttackHandler {
     public InventoryItem item;
     public RefinedManachargeItem toolItem;
     public int attackSeed;
-    private int shotsRemaining = 3, maxShots = 3;
+    private int shotsRemaining, maxShots;
     private int shots;
     public float timeBuffer;
     private final GameRandom random = new GameRandom();
 
     public float delay = 1.5f * 1000;
 
-    public BurstManachargeHandler(ItemAttackerMob itemAttacker, ItemAttackSlot slot, InventoryItem item, RefinedManachargeItem toolItem, int seed, int startTargetX, int startTargetY) {
+    public BurstManachargeHandler(ItemAttackerMob itemAttacker, ItemAttackSlot slot, InventoryItem item, RefinedManachargeItem toolItem, int seed, int startTargetX, int startTargetY, int bursts) {
         super(itemAttacker, slot, 50, 1000.0F, startTargetX, startTargetY);
         this.attackSeed = seed;
         this.timeBuffer = 1500;
         this.item = item;
         this.toolItem = toolItem;
+        this.maxShots = this.shotsRemaining = bursts;
     }
 
     public void onUpdate() {

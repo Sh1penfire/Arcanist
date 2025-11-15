@@ -1,17 +1,16 @@
 package arcanist.items.manacharge;
 
-import arcanist.content.ModContainers;
-import necesse.engine.GameState;
+import arcanist.content.GNDKeys;
+import arcanist.content.ModLensModifiers;
+import arcanist.util.Formatter;
 import necesse.engine.localization.Localization;
+import necesse.engine.network.gameNetworkData.GNDItemMap;
 import necesse.engine.network.packet.PacketOpenContainer;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.ContainerRegistry;
-import necesse.engine.world.GameClock;
-import necesse.engine.world.WorldSettings;
-import necesse.entity.Entity;
-import necesse.entity.TileEntity;
-import necesse.entity.mobs.Mob;
-import necesse.entity.projectile.Projectile;
+import necesse.engine.util.GameBlackboard;
+import necesse.entity.mobs.PlayerMob;
+import necesse.gfx.gameTooltips.ListGameTooltips;
 import necesse.inventory.Inventory;
 import necesse.inventory.InventoryItem;
 import necesse.inventory.PlayerInventorySlot;
@@ -22,8 +21,10 @@ import necesse.inventory.container.slots.ContainerSlot;
 import necesse.inventory.item.Item;
 import necesse.inventory.item.miscItem.InternalInventoryItemInterface;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static arcanist.content.ModLensModifiers.ModifierEntry.applyModifiers;
+import static arcanist.content.ModLensModifiers.ModifierEntry.sumModifiers;
 
 
 //Look mom, im a code reuser!
@@ -35,11 +36,40 @@ public class AmpItem extends Item implements InternalInventoryItemInterface {
 
     public int manaCost, reload;
 
+    public GNDItemMap baseStats = new GNDItemMap();
+
     public AmpItem(int capacity){
         super(1);
         this.capacity = capacity;
         this.reload = (int) (0.125f * 1000);
     }
+
+    public void flat(ModLensModifiers.ModifierEntry entry, float amount){
+        baseStats.setFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX, amount);
+    }
+
+    public void multi(ModLensModifiers.ModifierEntry entry, float amount){
+        baseStats.setFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX, amount);
+    }
+
+    public void flag(ModLensModifiers.ModifierEntry entry, boolean value){
+        baseStats.setBoolean(entry.id, value);
+    }
+
+    public ListGameTooltips getTooltips(InventoryItem item, PlayerMob perspective, GameBlackboard blackboard) {
+        ListGameTooltips tooltip = super.getTooltips(item, perspective, blackboard);
+        GNDItemMap data = item.getGndData();
+        return Formatter.formatModifiers(tooltip, data, false, false);
+    };
+
+    @Override
+    public InventoryItem getDefaultItem(PlayerMob player, int amount) {
+        InventoryItem item = super.getDefaultItem(player, amount);
+        item.getGndData().setBoolean(GNDKeys.MODIFIER_ITEM, true);
+        item.getGndData().addAll(baseStats);
+        return item;
+    }
+
 
     //Boilerplate code
     public Supplier<ContainerActionResult> getInventoryRightClickAction(Container container, InventoryItem item, int slotIndex, ContainerSlot slot) {
@@ -79,5 +109,35 @@ public class AmpItem extends Item implements InternalInventoryItemInterface {
     @Override
     public int getInternalInventorySize() {
         return capacity;
+    }
+
+    @Override
+    public void saveInternalInventory(InventoryItem item, Inventory inventory) {
+        InternalInventoryItemInterface.super.saveInternalInventory(item, inventory);
+        sumEffects(item);
+    }
+
+    //Bit of boilerplate, could have this in an interface somehow but idk how I'd do that
+    public void sumEffects(InventoryItem amplifier){
+        Inventory inv = getInternalInventory(amplifier);
+        GNDItemMap tmpGND = amplifier.getGndData();
+
+        //Reset all the values
+        ModLensModifiers.flat.forEach((entry) -> {
+            tmpGND.setFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX, 0);
+        });
+        ModLensModifiers.multi.forEach((entry) -> {
+            tmpGND.setFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX, 0);
+        });
+        ModLensModifiers.flags.forEach((entry) -> {
+            tmpGND.setBoolean(entry.id, false);
+        });
+
+        for (int i = 0; i < capacity; i++) {
+            InventoryItem item = inv.getItem(i);
+            if(item == null) continue;
+            sumModifiers(tmpGND, item.getGndData());
+        }
+        applyModifiers(tmpGND, baseStats);
     }
 }

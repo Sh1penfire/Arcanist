@@ -41,7 +41,15 @@ acn_drill_bullet=Drill Bullet
 acn_midas_bullet=Midas Bullet
 
 acn_focal_lens=Focal Lens
+acn_sharp_lens=Sharp Lens
+acn_drilling_lens=Drilling Lens
+
+acn_gilded_amp=Gilded Amp
+acn_icicle_generator=Icicle Generator
+acn_manacharge_pistol=Manacharge Pistol
+
 acn_example_lens=Example Lens
+
 
 [itemtooltip]
 propick_tip=Allow you to find extra goodies in ore!
@@ -76,6 +84,9 @@ objectDamageFract=Object Damage: <value>
 pierce=Pierce: <value>
 range=Range: <value>
 speed=Speed: <value>
+shots=Shots: <value>
+bursts=Bursts: <value>
+inaccuracy=Inaccuracy: <value>
 
 [acn_keywords]
 enabled: Enabled

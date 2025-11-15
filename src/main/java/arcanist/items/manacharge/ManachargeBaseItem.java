@@ -57,8 +57,18 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
 
     public float chargeCost, chargeRate;
 
+    //Theese get put into the base stats
+    public int shots, bursts;
+    public float inaccuracy;
+
+    /*
+    shots
+    bursts
+    inaccuracy
+     */
+
     //Modifications to the projectile, please don't put manacharge data in here~ (or do, it's up to you)
-    public GNDItemMap statMultipliers = new GNDItemMap(), abilityStats = new GNDItemMap();
+    public GNDItemMap baseStats = new GNDItemMap(), abilityStats = new GNDItemMap();
 
     public String tooltipKey;
 
@@ -76,15 +86,15 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
     }
 
     public void flat(ModLensModifiers.ModifierEntry entry, float amount){
-        statMultipliers.setFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX, amount);
+        baseStats.setFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX, amount);
     }
 
     public void multi(ModLensModifiers.ModifierEntry entry, float amount){
-        statMultipliers.setFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX, amount);
+        baseStats.setFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX, amount);
     }
 
     public void flag(ModLensModifiers.ModifierEntry entry, boolean value){
-        statMultipliers.setBoolean(entry.id, value);
+        baseStats.setBoolean(entry.id, value);
     }
 
     public void floatAbilityStat(ModLensModifiers.ModifierEntry entry, float amount){
@@ -176,17 +186,17 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
         //(base + gen.flat + amp.flat) * gen.multi * amp.multi
         //Done in two separate phases
         ModLensModifiers.flat.forEach((entry) -> {
-            float value = generator.baseStats.getFloat(entry.id) + statMultipliers.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + genData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + ampData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX);
+            float value = generator.baseStats.getFloat(entry.id) + baseStats.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + genData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + ampData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX);
             manachargeData.setFloat(entry.id, value);
 
-            float abilityValue = abilityStats.getFloat(entry.id) + statMultipliers.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + genData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + ampData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX);
+            float abilityValue = abilityStats.getFloat(entry.id) + baseStats.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + genData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX) + ampData.getFloat(entry.id + GNDKeys.ADDITIVE_SUFFIX);
             manachargeData.setFloat(entry.id + GNDKeys.ABILITY_SUFFIX, abilityValue);
         });
         ModLensModifiers.multi.forEach((entry) -> {
-            float value = manachargeData.getFloat(entry.id) * (1 + statMultipliers.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + genData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + ampData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX));
+            float value = manachargeData.getFloat(entry.id) * (1 + baseStats.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + genData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + ampData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX));
             manachargeData.setFloat(entry.id, value);
 
-            float abilityValue = manachargeData.getFloat(entry.id + GNDKeys.ABILITY_SUFFIX) * (1 + statMultipliers.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + genData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + ampData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX));
+            float abilityValue = manachargeData.getFloat(entry.id + GNDKeys.ABILITY_SUFFIX) * (1 + baseStats.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + genData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX)) * (1 + ampData.getFloat(entry.id + GNDKeys.MULTIPLICATIVE_SUFFIX));
             manachargeData.setFloat(entry.id + GNDKeys.ABILITY_SUFFIX, abilityValue);
         });
         ModLensModifiers.flags.forEach((entry) -> {
@@ -284,6 +294,8 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
 
     public InventoryItem onAttack(Level level, int x, int y, ItemAttackerMob attackerMob, int attackHeight, InventoryItem item, ItemAttackSlot slot, int animAttack, int seed, GNDItemMap mapContent) {
 
+        manachargeData = item.getGndData();
+
         if(level.isServer()){
             float charge = item.getGndData().getFloat("acn_charge", 0);
             charge += Math.max(1, 1 + getCritChance(item, attackerMob)) * chargeRate;
@@ -291,15 +303,22 @@ public class ManachargeBaseItem extends ToolItem implements InternalInventoryIte
                 charge -= 100;
                 attackerMob.buffManager.addBuff(new ActiveBuff(ModBuffs.manacharge, attackerMob, 10 * 1000, null), level.isServer());
             }
-            item.getGndData().setFloat("acn_charge", charge);
+            manachargeData.setFloat("acn_charge", charge);
         }
 
         ProjectileGeneratorItem generator = generatorItem(item);
 
-        Projectile projectile = getProjectile(item.getGndData(), generator.projectileType, level, x, y, attackerMob);
 
-        projectile.getUniqueID(new GameRandom(seed));
-        attackerMob.addAndSendAttackerProjectile(projectile, 20);
+        GameRandom random = new GameRandom(seed);
+        GameRandom spreadRandom = new GameRandom((long)(seed + 10));
+
+        float inaccuracy = manachargeData.getFloat(ModLensModifiers.inaccuracy.id);
+        int shots = (int) manachargeData.getFloat(ModLensModifiers.shots.id);
+        for(int i = 0; i < Math.max(1, 1 + shots); i++){
+            Projectile projectile = getProjectile(item.getGndData(), generator.projectileType, level, x, y, attackerMob);
+            projectile.getUniqueID(random);
+            attackerMob.addAndSendAttackerProjectile(projectile, 20, (spreadRandom.nextFloat() - 0.5f) * inaccuracy);
+        }
 
         this.consumeMana(attackerMob, item);
 

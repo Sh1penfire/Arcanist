@@ -25,6 +25,7 @@ import necesse.inventory.item.toolItem.swordToolItem.greatswordToolItem.Greatswo
 import necesse.level.maps.Level;
 import necesse.level.maps.LevelObjectHit;
 import necesse.level.maps.light.GameLight;
+import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.util.List;

@@ -59,7 +59,7 @@ public class ProjectileGeneratorItem extends Item implements InternalInventoryIt
     public ListGameTooltips getTooltips(InventoryItem item, PlayerMob perspective, GameBlackboard blackboard) {
         ListGameTooltips tooltip = super.getTooltips(item, perspective, blackboard);
         GNDItemMap data = item.getGndData();
-        return Formatter.formatModifiers(tooltip, data, false);
+        return Formatter.formatModifiers(tooltip, data, false, false);
     };
 
     @Override
