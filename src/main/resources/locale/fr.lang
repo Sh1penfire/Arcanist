@@ -1,0 +1,62 @@
+# Traduction réalisée par Caranud (https://steamcommunity.com/id/Caranud/)
+# Version de mod : 1.0 [15/11/25]
+# Version de jeu : 1.0 [16/10/25] (testé fonctionnel sur la 1.0.2)
+# Date de la dernière traduction : 16/11/2025
+# Note de Caranud : n’hésitez pas à reprendre cette traduction si je ne suis plus actif et disponible depuis un moment ! :) Je suis également sur le serveur Discord (https://discord.com/invite/HSvuUuA).
+
+[object]
+acn_crusher=Broyeur de l’arcaniste
+acn_packager=Emballeuse de l’arcaniste
+acn_scorcher=Brûleur de l’arcaniste
+
+[item]
+acn_copper_dust=Poudre de cuivre
+acn_iron_dust=Poudre de fer
+acn_gold_dust=Poudre d’or
+acn_runestone_paste=Poudre de pierre runique
+acn_ivy_paste=Pâte de lierre
+
+acn_copper_dust_package=Sachet de poussière de cuivre
+acn_iron_dust_package=Sachet de poussière de fer
+acn_gold_dust_package=Sachet de poussière d’or
+acn_ivy_paste_package=Sachet de pâte de lierre
+
+acn_frostshard_cluster=Amas d’éclats de givre
+acn_quartz_cluster=Amas de quartz
+
+acn_runed_steel=Acier runique
+acn_charloag=Charbûche
+
+acn_propick=Pioche de professionnel
+
+acn_ore_pouch=Bourse à minerai d’arcaniste
+
+acn_drill_bullet=Balle foreuse
+acn_midas_bullet=Balle de Midas
+
+[itemtooltip]
+propick_tip=La rune gravée « Propick » vous offre le savoir ancestral des nains stellaires, ce qui vous permet de trouver davantage de choses dans vos excavations !
+midasammo_tip=Les créatures lâchent de l’or en étant touché par cette munition !
+drillammo_tip=Endommage les objets\nS’améliore à la fois avec les modificateurs d’outil et de de distance !
+
+cluster_tip=Concassez-le dans un broyeur pour obtenir des ressources.
+orepouch_tip=Agrandi magiquement à la manière d’un sac sans fond.\nContient des minerais, des pierres précieuses et des poudres minérales.
+storedores=Mineraux contenus : <amount>
+
+charrable_tip=Carbonisable dans un brûleur d’arcaniste.
+
+crusher_tip=Concasse des éléments en poudre fine.
+packager_tip=Range des matériaux dans des contenants.
+scorcher_tip=Brûle les rondins et les sachets de poussière.
+
+[itemcategory]
+acn_dusts=Poudres minérales
+acn_clusters=Géode
+acn_packages=Sachets de poudre
+
+[acn_modifiers]
+damage=Dégâts: <amount>
+damage_multi=<amount> dégâts
+object_damage_fract=Dégâts d’objet : <amount> %
+pierce=Pénétration : <amount>
+speed=Vitesse : <amount>
